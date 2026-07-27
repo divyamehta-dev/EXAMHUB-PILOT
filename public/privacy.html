@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Privacy Policy — ExamHub (DPDP Act 2023 & IT Act Compliant)</title>
+  <meta name="description" content="ExamHub Privacy Policy — Compliant with India's Digital Personal Data Protection Act 2023 and Information Technology Act 2000." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --indigo-900: #1e1b4b; --indigo-800: #312e81; --indigo-700: #3730a3;
+      --indigo-600: #4f46e5; --indigo-500: #6366f1; --indigo-400: #818cf8;
+      --indigo-100: #e0e7ff; --indigo-50: #eef2ff;
+      --violet-600: #7c3aed; --violet-500: #8b5cf6;
+      --slate-900: #0f172a; --slate-800: #1e293b; --slate-700: #334155;
+      --slate-600: #475569; --slate-500: #64748b; --slate-400: #94a3b8;
+      --slate-200: #e2e8f0; --slate-100: #f1f5f9; --slate-50: #f8fafc;
+      --emerald-500: #10b981; --white: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--slate-700); line-height: 1.7; }
+
+    /* NAV */
+    nav {
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--slate-200); position: sticky; top: 0; z-index: 100;
+      padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--indigo-700); text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--indigo-600), var(--violet-600)); border-radius: 8px; display: grid; place-items: center; font-size: 1rem; }
+    .nav-back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border: 1.5px solid var(--slate-200); border-radius: 8px; color: var(--slate-600); font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .nav-back:hover { border-color: var(--indigo-300); color: var(--indigo-600); background: var(--indigo-50); }
+
+    /* HERO */
+    .page-hero {
+      background: linear-gradient(135deg, var(--indigo-900) 0%, var(--indigo-800) 50%, var(--violet-600) 100%);
+      padding: 72px 40px 80px; text-align: center; position: relative; overflow: hidden;
+    }
+    .page-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 60px 60px; }
+    .page-hero-inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; }
+    .page-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; color: var(--indigo-200); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 20px; }
+    .page-hero h1 { font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; color: var(--white); margin-bottom: 14px; letter-spacing: -0.02em; }
+    .page-hero p { color: rgba(255,255,255,0.7); font-size: 1rem; }
+    .page-hero-meta { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+    .page-hero-meta span { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: rgba(255,255,255,0.55); }
+
+    /* LAYOUT */
+    .doc-layout { display: grid; grid-template-columns: 260px 1fr; gap: 48px; max-width: 1100px; margin: 0 auto; padding: 60px 40px; align-items: start; }
+    .doc-toc { position: sticky; top: 84px; }
+    .toc-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate-400); margin-bottom: 16px; }
+    .toc-list { list-style: none; }
+    .toc-list li a { display: block; padding: 7px 12px; font-size: 0.85rem; color: var(--slate-500); text-decoration: none; border-radius: 7px; transition: all 0.2s; border-left: 2px solid transparent; }
+    .toc-list li a:hover { color: var(--indigo-600); background: var(--indigo-50); border-left-color: var(--indigo-400); }
+    .toc-list li a.active { color: var(--indigo-600); background: var(--indigo-50); border-left-color: var(--indigo-600); font-weight: 600; }
+
+    /* CONTENT */
+    .doc-content { min-width: 0; }
+    .doc-section { margin-bottom: 56px; padding-bottom: 56px; border-bottom: 1px solid var(--slate-100); }
+    .doc-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .doc-section h2 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--slate-900); margin-bottom: 16px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+    .doc-section h2 .section-icon { font-size: 1.1rem; }
+    .doc-section h3 { font-size: 1rem; font-weight: 700; color: var(--slate-800); margin: 24px 0 10px; }
+    .doc-section p { font-size: 0.95rem; color: var(--slate-600); margin-bottom: 14px; }
+    .doc-section p:last-child { margin-bottom: 0; }
+    .doc-section ul, .doc-section ol { padding-left: 24px; margin-bottom: 14px; }
+    .doc-section li { font-size: 0.95rem; color: var(--slate-600); margin-bottom: 8px; }
+    .doc-section li strong { color: var(--slate-800); }
+
+    .info-box {
+      background: var(--indigo-50); border: 1px solid var(--indigo-100); border-radius: 12px;
+      padding: 18px 22px; margin: 20px 0; font-size: 0.9rem; color: var(--indigo-700);
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .info-box-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+    .highlight-box {
+      background: var(--slate-50); border-left: 4px solid var(--indigo-500); border-radius: 0 10px 10px 0;
+      padding: 16px 20px; margin: 20px 0;
+    }
+    .highlight-box p { margin: 0; font-size: 0.9rem; color: var(--slate-600); }
+
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.875rem; }
+    th { background: var(--slate-100); padding: 10px 16px; text-align: left; font-weight: 700; color: var(--slate-700); border: 1px solid var(--slate-200); }
+    td { padding: 10px 16px; color: var(--slate-600); border: 1px solid var(--slate-200); }
+    tr:nth-child(even) td { background: var(--slate-50); }
+
+    /* FOOTER */
+    .doc-footer { background: var(--slate-900); color: rgba(255,255,255,0.5); padding: 40px; text-align: center; font-size: 0.85rem; }
+    .doc-footer a { color: var(--indigo-400); text-decoration: none; }
+    .doc-footer a:hover { color: var(--white); }
+    .doc-footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .doc-layout { grid-template-columns: 1fr; padding: 40px 20px; }
+      .doc-toc { display: none; }
+      nav { padding: 0 20px; }
+      .page-hero { padding: 56px 20px 64px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon">🎓</div>
+    ExamHub
+  </a>
+  <a href="/" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-badge">🇮🇳 Indian Statutory Standards</div>
+    <h1>Privacy Policy</h1>
+    <p>Compliant with India's Digital Personal Data Protection (DPDP) Act 2023 &amp; IT Act 2000.</p>
+    <div class="page-hero-meta">
+      <span>📅 Last updated: July 22, 2025</span>
+      <span>📜 Pursuant to Sec 43A of IT Act 2000 &amp; DPDP Act 2023</span>
+    </div>
+  </div>
+</div>
+
+<div class="doc-layout">
+  <!-- TOC -->
+  <aside class="doc-toc">
+    <p class="toc-title">On This Page</p>
+    <ul class="toc-list">
+      <li><a href="#overview" class="active">1. Legal Standing & Framework</a></li>
+      <li><a href="#roles">2. Data Fiduciary vs Data Processor</a></li>
+      <li><a href="#collection">3. Digital Data We Collect</a></li>
+      <li><a href="#use">4. Lawful Purpose & Consent</a></li>
+      <li><a href="#security">5. Reasonable Security Practices</a></li>
+      <li><a href="#principal-rights">6. Data Principal Rights</a></li>
+      <li><a href="#retention">7. Retention & Eradication</a></li>
+      <li><a href="#cross-border">8. Data Localization & Transfer</a></li>
+      <li><a href="#grievance">9. Statutory Grievance Redressal</a></li>
+      <li><a href="#governing">10. Jurisdiction & Compliance</a></li>
+    </ul>
+  </aside>
+
+  <!-- Content -->
+  <main class="doc-content">
+
+    <div class="doc-section" id="overview">
+      <h2><span class="section-icon">⚖️</span> 1. Statutory Framework &amp; Legal Standing</h2>
+      <div class="info-box">
+        <span class="info-box-icon">🏛️</span>
+        <span>This Privacy Policy is published in accordance with the provisions of <strong>Rule 3(1) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021</strong>, Section 43A of the <strong>Information Technology Act, 2000</strong>, the <strong>IT (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011</strong>, and the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>.</span>
+      </div>
+      <p>This Privacy Policy governs the processing, collection, storage, transfer, and protection of digital personal data collected by <strong>ExamHub Technologies Private Limited</strong> ("ExamHub", "Company", "We", "Us", or "Our"), a company incorporated under the Indian Companies Act, 2013, having its registered office in India, from educational institutions, universities, coaching academies, administrators, faculty, and students ("Data Principals" or "Users").</p>
+    </div>
+
+    <div class="doc-section" id="roles">
+      <h2><span class="section-icon">🤝</span> 2. Data Fiduciary vs. Data Processor</h2>
+      <p>Under the Digital Personal Data Protection Act, 2023:</p>
+      <ul>
+        <li><strong>The Educational Institution / University ("Client"):</strong> Acts as the <strong>Data Fiduciary</strong>. The Institution determines the purpose and means of processing student data, schedules exams, decides eligibility, and controls candidate records.</li>
+        <li><strong>ExamHub:</strong> Acts as the <strong>Data Processor</strong>. We process digital personal data solely on behalf of, and under valid instructions from, the Data Fiduciary pursuant to a lawful contract.</li>
+      </ul>
+      <div class="highlight-box">
+        <p><strong>Note for Students:</strong> Your university/college is the primary Data Fiduciary. Requests for correction, deletion, or access to official academic records should be directed to your institution's Controller of Examinations or Registrar.</p>
+      </div>
+    </div>
+
+    <div class="doc-section" id="collection">
+      <h2><span class="section-icon">📦</span> 3. Digital Data We Collect</h2>
+      <h3>3.1 Personal Data Provided by Data Fiduciary</h3>
+      <p>The Institution uploads or registers the following candidate details:</p>
+      <ul>
+        <li>Full Name, Gender, Date of Birth</li>
+        <li>Institutional Email Address and Mobile Number</li>
+        <li>Roll Number, Enrollment Number, Course / Batch Code</li>
+        <li>Passport Photograph (if enabled by institution for candidate verification)</li>
+      </ul>
+
+      <h3>3.2 Technical &amp; Exam Session Data (Processed Automatically)</h3>
+      <p>To ensure fair examination conduct and prevent academic malpractice in accordance with UGC/NTA guidelines, ExamHub logs:</p>
+      <ul>
+        <li><strong>Network Identifiers:</strong> IP Address, System Hostname, ISP Details</li>
+        <li><strong>Device Parameters:</strong> Operating System version, Browser Fingerprint, Screen Resolution</li>
+        <li><strong>Proctoring Telemetry:</strong> Full-screen exit logs, tab-switch events, window focus changes, keyboard navigation events</li>
+        <li><strong>Assessment Audit Logs:</strong> Question visit timestamps, response selection history, submission verification hashes</li>
+      </ul>
+
+      <table>
+        <thead><tr><th>Data Category</th><th>Legal Basis / Statutory Rule</th><th>Retention Period</th></tr></thead>
+        <tbody>
+          <tr><td>Candidate Identifiers</td><td>DPDP Act 2023 Sec 6 (Consent / Contract)</td><td>Active Subscription + 12 Months</td></tr>
+          <tr><td>Proctoring Logs</td><td>IT Act 2000 Sec 79 (Audit Trail)</td><td>90 Days from Exam Date</td></tr>
+          <tr><td>Graded Test Papers</td><td>Data Fiduciary Contract Mandate</td><td>As per University Audit Rules</td></tr>
+          <tr><td>System Access Logs</td><td>CERT-In Cyber Security Directions 2022</td><td>180 Days (Mandatory under Indian Law)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-section" id="use">
+      <h2><span class="section-icon">⚙️</span> 4. Lawful Purpose &amp; Consent</h2>
+      <p>ExamHub processes digital personal data strictly for lawful, specified purposes:</p>
+      <ul>
+        <li>Providing secure computer-based testing (CBT) and online examination services</li>
+        <li>Automated evaluation of Multiple Choice Questions (MCQ) and Multiple Select Questions (MSQ)</li>
+        <li>Generating certified transcripts, scorecards, merit lists, and analytics for the Data Fiduciary</li>
+        <li>Preventing examination fraud, impersonation, and unauthorized access</li>
+        <li>Complying with cybersecurity mandates issued by <strong>CERT-In (Indian Computer Emergency Response Team)</strong></li>
+      </ul>
+      <div class="info-box">
+        <span class="info-box-icon">🚫</span>
+        <span>ExamHub <strong>does not sell, rent, monetize, or profile candidate personal data</strong> for commercial advertising. Data is processed exclusively for educational and examination delivery.</span>
+      </div>
+    </div>
+
+    <div class="doc-section" id="security">
+      <h2><span class="section-icon">🔐</span> 5. Reasonable Security Practices &amp; Procedures</h2>
+      <p>Pursuant to <strong>Section 43A of the Information Technology Act, 2000</strong> and the <strong>IT (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011</strong>, ExamHub maintains comprehensive technical and organizational security controls:</p>
+      <ul>
+        <li><strong>Encryption Standards:</strong> Data in transit is protected using TLS 1.3 encryption; static database volumes are encrypted using AES-256 bits encryption.</li>
+        <li><strong>Password Protection:</strong> User authentication credentials are protected using salted bcrypt cryptographic hashes.</li>
+        <li><strong>Session Integrity:</strong> Secure JSON Web Tokens (JWT) with mandatory idle timeout enforcement.</li>
+        <li><strong>Infrastructure Security:</strong> Enterprise PostgreSQL instance deployed in Indian data center zones with automated backups and firewall protection.</li>
+        <li><strong>Incident Response:</strong> Mandatory cybersecurity incident reporting to CERT-In within statutory timelines.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="principal-rights">
+      <h2><span class="section-icon">⚖️</span> 6. Data Principal Rights (Under DPDP Act 2023)</h2>
+      <p>Subject to statutory limits for official examinations, Data Principals enjoy the following statutory rights under Chapter III of the DPDP Act 2023:</p>
+      <ul>
+        <li><strong>Right to Access Information (Sec 11):</strong> Right to obtain a summary of personal data being processed and identities of processing entities.</li>
+        <li><strong>Right to Correction &amp; Erasure (Sec 12):</strong> Right to request correction of inaccurate data or erasure of data no longer necessary for exam administration.</li>
+        <li><strong>Right of Grievance Redressal (Sec 13):</strong> Right to readily available means of grievance redressal regarding data obligations.</li>
+        <li><strong>Right to Nominate (Sec 14):</strong> Right to nominate an individual to exercise rights in the event of death or incapacity.</li>
+      </ul>
+      <p>Data Principals may submit rights requests to their respective University/Institute Data Fiduciary or directly to our Grievance Officer.</p>
+    </div>
+
+    <div class="doc-section" id="retention">
+      <h2><span class="section-icon">📂</span> 7. Data Retention &amp; Eradication</h2>
+      <p>Personal data is retained only for the duration specified by the Data Fiduciary or required by Indian statutory mandates:</p>
+      <ul>
+        <li><strong>Active Exam Data:</strong> Retained for the duration of the institutional contract.</li>
+        <li><strong>Cybersecurity Logs:</strong> Retained for 180 days as mandated under CERT-In Directions 2022.</li>
+        <li><strong>Eradication Procedure:</strong> Post-expiry of retention timelines, data is overwritten using secure cryptographic deletion procedures.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="cross-border">
+      <h2><span class="section-icon">🌐</span> 8. Data Localization &amp; Cross-Border Processing</h2>
+      <p>ExamHub prioritizes storing and processing data within the sovereign territory of the Republic of India.</p>
+      <p>In accordance with <strong>Section 16 of the DPDP Act 2023</strong>, personal data may only be transferred to countries or territories outside India that are not restricted by Central Government notification, ensuring equivalent levels of privacy safeguard.</p>
+    </div>
+
+    <div class="doc-section" id="grievance">
+      <h2><span class="section-icon">🇮🇳</span> 9. Statutory Grievance Redressal Mechanism</h2>
+      <p>In accordance with the <strong>Information Technology Act 2000</strong>, the <strong>IT Intermediary Rules 2021</strong>, and <strong>Section 13 of the DPDP Act 2023</strong>, the details of the designated Grievance Officer for ExamHub are set out below:</p>
+      
+      <div class="info-box" style="background: var(--slate-50); border: 1px solid var(--slate-200); color: var(--slate-800);">
+        <span class="info-box-icon">👨‍⚖️</span>
+        <div>
+          <strong style="font-size: 1rem; color: var(--indigo-700);">Grievance Officer — ExamHub</strong><br/><br/>
+          <strong>Name:</strong> Grievance Redressal Officer<br/>
+          <strong>Designation:</strong> Head of Legal &amp; Data Compliance<br/>
+          <strong>Company:</strong> ExamHub Technologies Private Limited<br/>
+          <strong>Address:</strong> Registered Office, New Delhi - 110001, India<br/>
+          <strong>Email:</strong> <a href="mailto:grievance@examhub.io" style="color: var(--indigo-600); font-weight:700;">grievance@examhub.io</a><br/>
+          <strong>Statutory SLA:</strong> Acknowledgment within 24 hours; Resolution within 15 working days.
+        </div>
+      </div>
+      <p>If you are unsatisfied with the resolution provided by our Grievance Officer, you retain the statutory right to escalate the matter to the <strong>Data Protection Board of India (DPBI)</strong> established under the DPDP Act 2023.</p>
+    </div>
+
+    <div class="doc-section" id="governing">
+      <h2><span class="section-icon">🏛️</span> 10. Jurisdiction &amp; Governing Law</h2>
+      <p>This Privacy Policy is governed by and construed in accordance with the <strong>laws of the Republic of India</strong>. Any dispute arising out of or in connection with data processing under this policy shall be subject to the exclusive jurisdiction of the competent courts at <strong>New Delhi, India</strong>.</p>
+    </div>
+
+  </main>
+</div>
+
+<footer class="doc-footer">
+  <div class="doc-footer-links">
+    <a href="/">Home</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="mailto:legal@examhub.io">Legal Contact</a>
+  </div>
+  <p>© 2025 ExamHub Technologies Private Limited · Incorporated under Companies Act, 2013 (India) · All rights reserved.</p>
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('.doc-section');
+  const tocLinks = document.querySelectorAll('.toc-list li a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`.toc-list li a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

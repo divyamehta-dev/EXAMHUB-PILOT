@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Manage Exams — ExamHub Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="top-bar"><div class="top-bar-brand"><div class="top-bar-logo">🎓</div> ExamHub Admin</div><div class="top-bar-right"><button class="btn btn-secondary btn-sm" onclick="logout()" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)">Sign Out</button></div></div>
+    <nav class="navbar" id="navbar"></nav>
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div><h1>Exam Management</h1><p>Create and manage assessments</p></div>
+        <button class="btn btn-primary" onclick="openCreateModal()">+ Create Exam</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="container">
+        <div id="exams-list"></div>
+
+        <!-- Sections management (shown when exam is expanded) -->
+        <div id="sections-panel" style="display:none;margin-top:16px">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📂 Sections for: <span id="sections-exam-title"></span></div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('sections-panel').style.display='none'">✕ Close</button>
+                <button class="btn btn-primary btn-sm" onclick="openAddSection()">+ Add Section</button>
+              </div>
+            </div>
+            <div id="sections-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exam Modal -->
+  <div class="modal-overlay" id="modal-exam">
+    <div class="modal" style="max-width:600px">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-exam-title">Create Exam</h3>
+        <button class="modal-close" onclick="closeModal('modal-exam')">✕</button>
+      </div>
+      <form id="exam-form">
+        <input type="hidden" id="ef-id">
+        <div class="grid grid-2">
+          <div class="form-group col-span-2">
+            <label class="form-label required">Exam Title</label>
+            <input class="form-control" id="ef-title" required placeholder="e.g. TCS NQT Cognitive Skills">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Exam Code</label>
+            <input class="form-control" id="ef-code" placeholder="e.g. TCS-NQT-2024">
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Duration (minutes)</label>
+            <input class="form-control" type="number" id="ef-duration" min="1" value="60" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">Pass Percentage (%)</label>
+            <input class="form-control" type="number" id="ef-pass" min="0" max="100" value="40" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Total Marks</label>
+            <input class="form-control" type="number" id="ef-marks" min="0" value="100">
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" id="ef-desc" rows="2" placeholder="Brief description of this assessment..."></textarea>
+          </div>
+          <div class="form-group col-span-2">
+            <label class="form-label">Instructions (one per line)</label>
+            <textarea class="form-control" id="ef-instructions" rows="4" placeholder="Enter exam instructions..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-control" id="ef-published">
+              <option value="false">Draft</option>
+              <option value="true">Published</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Options</label>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+              <div class="form-check"><input type="checkbox" id="ef-shuffle-q"><label class="form-check-label" for="ef-shuffle-q">Shuffle Questions</label></div>
+              <div class="form-check"><input type="checkbox" id="ef-shuffle-o"><label class="form-check-label" for="ef-shuffle-o">Shuffle Options</label></div>
+              <div class="form-check"><input type="checkbox" id="ef-show-result" checked><label class="form-check-label" for="ef-show-result">Show result immediately</label></div>
+              <div class="form-check">
+                <input type="checkbox" id="ef-enable-cert" checked>
+                <label class="form-check-label" for="ef-enable-cert">🎓 Issue Certificate on Pass</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-exam')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-exam">Save Exam</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Section Modal -->
+  <div class="modal-overlay" id="modal-section">
+    <div class="modal" style="max-width:480px">
+      <div class="modal-header">
+        <h3 class="modal-title" id="section-modal-title">Add Section</h3>
+        <button class="modal-close" onclick="closeModal('modal-section')">✕</button>
+      </div>
+      <form id="section-form">
+        <input type="hidden" id="sf-id">
+        <div class="form-group">
+          <label class="form-label required">Section Name</label>
+          <input class="form-control" id="sf-name" required placeholder="e.g. Verbal Ability">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input class="form-control" id="sf-desc" placeholder="Brief description">
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label">Section Time Limit (min)</label>
+            <input class="form-control" type="number" id="sf-duration" min="0" placeholder="Leave blank = shared">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Marks per Question</label>
+            <input class="form-control" type="number" id="sf-marks" step="0.5" value="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Negative Marks (wrong)</label>
+            <input class="form-control" type="number" id="sf-neg" step="0.25" value="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sort Order</label>
+            <input class="form-control" type="number" id="sf-order" value="1" min="1">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-section')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-section">Save Section</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth('admin');
+    buildNavbar('Exams');
+    let exams = [], currentSectionsExamId = null;
+
+    async function loadExams() {
+      exams = await apiFetch('/exams');
+      renderExams();
+    }
+
+    function renderExams() {
+      const el = document.getElementById('exams-list');
+      if (!exams.length) {
+        el.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">📋</div><h3>No exams yet</h3><p>Create your first exam to get started.</p></div></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="table-wrapper"><table>
+        <thead><tr><th>Title</th><th>Code</th><th>Duration</th><th>Sections</th><th>Pass %</th><th>Status</th><th>Certificate</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${exams.map(e => `<tr>
+            <td>
+              <div style="font-weight:700;color:var(--text-primary)">${esc(e.title)}</div>
+              <div style="font-size:.76rem;color:var(--text-muted)">${esc(e.description||'')}</div>
+            </td>
+            <td><span class="badge badge-grey">${esc(e.exam_code||'—')}</span></td>
+            <td>${e.total_duration} min</td>
+            <td>${e.exam_sections?.length||0}</td>
+            <td>${e.pass_percentage}%</td>
+            <td>${e.is_published ? '<span class="badge badge-success">Published</span>' : '<span class="badge badge-grey">Draft</span>'}</td>
+            <td>${e.enable_certificate !== false ? '<span class="badge badge-blue">🎓 On</span>' : '<span class="badge badge-grey">Off</span>'}</td>
+            <td style="color:var(--text-muted);font-size:.8rem">${formatDate(e.created_at)}</td>
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn btn-secondary btn-sm" onclick="editExam('${e.id}')">Edit</button>
+                <button class="btn btn-secondary btn-sm" onclick="manageSections('${e.id}','${esc(e.title)}')">📂 Sections</button>
+                <a href="/admin/questions.html?examId=${e.id}" class="btn btn-secondary btn-sm">❓ Questions</a>
+                <button class="btn btn-${e.is_published ? 'warning' : 'success'} btn-sm" onclick="togglePublish('${e.id}',${!e.is_published})">${e.is_published ? 'Unpublish' : 'Publish'}</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteExam('${e.id}')">Delete</button>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+    }
+
+    function openCreateModal() {
+      document.getElementById('ef-id').value = '';
+      document.getElementById('exam-form').reset();
+      document.getElementById('ef-duration').value = 60;
+      document.getElementById('ef-pass').value = 40;
+      document.getElementById('ef-marks').value = 100;
+      document.getElementById('ef-show-result').checked = true;
+      document.getElementById('ef-enable-cert').checked = true; // default ON
+      document.getElementById('modal-exam-title').textContent = 'Create Exam';
+      openModal('modal-exam');
+    }
+
+    function editExam(id) {
+      const e = exams.find(x => x.id === id);
+      if (!e) return;
+      document.getElementById('ef-id').value = e.id;
+      document.getElementById('ef-title').value = e.title;
+      document.getElementById('ef-code').value = e.exam_code || '';
+      document.getElementById('ef-duration').value = e.total_duration;
+      document.getElementById('ef-pass').value = e.pass_percentage;
+      document.getElementById('ef-marks').value = e.total_marks;
+      document.getElementById('ef-desc').value = e.description || '';
+      document.getElementById('ef-instructions').value = e.instructions || '';
+      document.getElementById('ef-published').value = String(e.is_published);
+      document.getElementById('ef-shuffle-q').checked = e.shuffle_questions;
+      document.getElementById('ef-shuffle-o').checked = e.shuffle_options;
+      document.getElementById('ef-show-result').checked = e.show_result;
+      document.getElementById('ef-enable-cert').checked = e.enable_certificate !== false; // default true if not set
+      document.getElementById('modal-exam-title').textContent = 'Edit Exam';
+      openModal('modal-exam');
+    }
+
+    document.getElementById('exam-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const id  = document.getElementById('ef-id').value;
+      const btn = document.getElementById('btn-save-exam');
+      const payload = {
+        title: document.getElementById('ef-title').value.trim(),
+        exam_code: document.getElementById('ef-code').value.trim() || null,
+        total_duration: parseInt(document.getElementById('ef-duration').value),
+        pass_percentage: parseInt(document.getElementById('ef-pass').value),
+        total_marks: parseInt(document.getElementById('ef-marks').value),
+        description: document.getElementById('ef-desc').value.trim() || null,
+        instructions: document.getElementById('ef-instructions').value.trim() || null,
+        is_published: document.getElementById('ef-published').value === 'true',
+        shuffle_questions: document.getElementById('ef-shuffle-q').checked,
+        shuffle_options: document.getElementById('ef-shuffle-o').checked,
+        show_result: document.getElementById('ef-show-result').checked,
+        enable_certificate: document.getElementById('ef-enable-cert').checked
+      };
+      btn.disabled = true; btn.textContent = 'Saving...';
+      try {
+        if (id) await apiFetch(`/exams/${id}`, { method: 'PUT', body: payload });
+        else await apiFetch('/exams', { method: 'POST', body: payload });
+        showToast(id ? 'Exam updated!' : 'Exam created!', 'success');
+        closeModal('modal-exam');
+        await loadExams();
+      } catch (err) { showToast('Error: ' + err.message, 'error'); }
+      btn.disabled = false; btn.textContent = 'Save Exam';
+    });
+
+    async function togglePublish(id, pub) {
+      try { await apiFetch(`/exams/${id}`, { method: 'PUT', body: { is_published: pub } }); showToast(pub ? 'Published!' : 'Unpublished', 'success'); await loadExams(); }
+      catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function deleteExam(id) {
+      const ok = await confirmDialog('Delete this exam? All related sections, questions and results will also be deleted.', 'Delete', true);
+      if (!ok) return;
+      try { await apiFetch(`/exams/${id}`, { method: 'DELETE' }); showToast('Exam deleted', 'success'); await loadExams(); }
+      catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    // ── Sections ──────────────────────────────────────────────────
+    async function manageSections(examId, title) {
+      currentSectionsExamId = examId;
+      document.getElementById('sections-exam-title').textContent = title;
+      document.getElementById('sections-panel').style.display = 'block';
+      document.getElementById('sections-panel').scrollIntoView({ behavior: 'smooth' });
+      await loadSections();
+    }
+
+    async function loadSections() {
+      const sections = await apiFetch(`/exams/${currentSectionsExamId}/sections`);
+      const el = document.getElementById('sections-list');
+      if (!sections.length) {
+        el.innerHTML = `<div class="empty-state" style="padding:24px"><p>No sections. Click "Add Section" to create one.</p></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="table-wrapper"><table>
+        <thead><tr><th>#</th><th>Section Name</th><th>Duration</th><th>Marks/Q</th><th>Negative</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${sections.map(s => `<tr>
+            <td>${s.sort_order}</td>
+            <td style="font-weight:600">${esc(s.name)}</td>
+            <td>${s.duration ? s.duration + ' min' : 'Shared'}</td>
+            <td>${s.marks_per_q}</td>
+            <td style="color:${s.negative_marks > 0 ? 'var(--danger)' : 'var(--text-muted)'}">${s.negative_marks > 0 ? '-' + s.negative_marks : 'None'}</td>
+            <td><div style="display:flex;gap:6px">
+              <button class="btn btn-secondary btn-sm" onclick="editSection(${JSON.stringify(s).split('"').join('&quot;')})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteSection('${s.id}')">Delete</button>
+            </div></td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+    }
+
+    function openAddSection() {
+      document.getElementById('sf-id').value = '';
+      document.getElementById('section-form').reset();
+      document.getElementById('sf-marks').value = 1;
+      document.getElementById('sf-neg').value = 0;
+      document.getElementById('sf-order').value = 1;
+      document.getElementById('section-modal-title').textContent = 'Add Section';
+      openModal('modal-section');
+    }
+
+    function editSection(s) {
+      document.getElementById('sf-id').value = s.id;
+      document.getElementById('sf-name').value = s.name;
+      document.getElementById('sf-desc').value = s.description || '';
+      document.getElementById('sf-duration').value = s.duration || '';
+      document.getElementById('sf-marks').value = s.marks_per_q;
+      document.getElementById('sf-neg').value = s.negative_marks;
+      document.getElementById('sf-order').value = s.sort_order;
+      document.getElementById('section-modal-title').textContent = 'Edit Section';
+      openModal('modal-section');
+    }
+
+    document.getElementById('section-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('sf-id').value;
+      const btn = document.getElementById('btn-save-section');
+      const payload = {
+        exam_id: currentSectionsExamId,
+        name: document.getElementById('sf-name').value.trim(),
+        description: document.getElementById('sf-desc').value.trim() || null,
+        duration: document.getElementById('sf-duration').value ? parseInt(document.getElementById('sf-duration').value) : null,
+        marks_per_q: parseFloat(document.getElementById('sf-marks').value),
+        negative_marks: parseFloat(document.getElementById('sf-neg').value),
+        sort_order: parseInt(document.getElementById('sf-order').value)
+      };
+      btn.disabled = true; btn.textContent = 'Saving...';
+      try {
+        if (id) await apiFetch(`/sections/${id}`, { method: 'PUT', body: payload });
+        else await apiFetch(`/exams/${currentSectionsExamId}/sections`, { method: 'POST', body: payload });
+        showToast(id ? 'Section updated!' : 'Section added!', 'success');
+        closeModal('modal-section');
+        await loadSections();
+      } catch (err) { showToast('Error: ' + err.message, 'error'); }
+      btn.disabled = false; btn.textContent = 'Save Section';
+    });
+
+    async function deleteSection(id) {
+      const ok = await confirmDialog('Delete this section?', 'Delete', true);
+      if (!ok) return;
+      try { await apiFetch(`/sections/${id}`, { method: 'DELETE' }); showToast('Section deleted', 'success'); await loadSections(); }
+      catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    loadExams().catch(err => showToast('Load error: ' + err.message, 'error'));
+  </script>
+</body>
+</html>

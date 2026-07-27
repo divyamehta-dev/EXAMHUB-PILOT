@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>ExamHub — Candidate Login</title>
+  <meta name="description" content="ExamHub professional online assessment platform. Sign in to access your exam.">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="auth-page">
+    <!-- Left Panel -->
+    <div class="auth-sidebar">
+      <div class="auth-brand">
+        <a href="/" style="text-decoration:none; display:flex; align-items:center; gap:12px; color:inherit;">
+          <div class="auth-brand-icon">🎓</div>
+          <div>
+            <div class="auth-brand-name">ExamHub</div>
+            <div class="auth-brand-tag">Professional Assessment Platform</div>
+          </div>
+        </a>
+      </div>
+      <h2 class="auth-headline">Empowering Talent Through Smart Assessment</h2>
+      <p class="auth-subtitle">A world-class online exam platform designed for enterprise-grade assessments, competitive tests, and certification exams.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-icon">⏱️</div>
+          <div class="auth-feature-text">
+            <strong>Section-Based Timed Exams</strong>
+            <span>Per-section timers with auto-submit</span>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🎯</div>
+          <div class="auth-feature-text">
+            <strong>Smart Auto-Grading</strong>
+            <span>Instant scoring with negative marking</span>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🔐</div>
+          <div class="auth-feature-text">
+            <strong>Proctoring & Anti-Cheating</strong>
+            <span>Full-screen lock, tab-switch detection</span>
+          </div>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">📊</div>
+          <div class="auth-feature-text">
+            <strong>Detailed Analytics</strong>
+            <span>Section-wise scores & leaderboard</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top: auto; padding-top: 20px;">
+        <a href="/" style="color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.85rem; font-weight: 500;">← Back to Home Page</a>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="auth-main">
+      <div class="auth-form-card animate-in">
+        <h1 class="auth-form-title">Candidate Login</h1>
+        <p class="auth-form-subtitle">Enter your credentials to access the exam portal</p>
+
+        <div id="login-alert" style="display:none"></div>
+
+        <form id="login-form" autocomplete="off">
+          <div class="form-group">
+            <label class="form-label required" for="email">Email Address</label>
+            <input class="form-control" type="email" id="email" placeholder="yourname@example.com" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label class="form-label required" for="password">Password</label>
+            <div style="position:relative">
+              <input class="form-control" type="password" id="password" placeholder="Enter password" required autocomplete="current-password" style="padding-right:42px">
+              <button type="button" id="toggle-pw" onclick="togglePw()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:14px">👁</button>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg" id="btn-login" style="margin-top:4px">
+            Sign In to Portal
+          </button>
+        </form>
+
+        <div class="auth-divider">or</div>
+        <p style="text-align:center;font-size:.85rem;color:var(--text-muted)">
+          New candidate? <a href="/register.html" style="font-weight:600;color:var(--navy-600)">Register here →</a>
+        </p>
+
+        <div style="margin-top:20px;text-align:center;font-size:.75rem;color:var(--text-light)">
+          <a href="/" style="color:inherit; text-decoration:underline;">ExamHub</a> · Powered by Supabase
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    (function() {
+      const user = getUser();
+      if (user) window.location.href = user.role === 'admin' ? '/admin/dashboard.html' : '/student/dashboard.html';
+    })();
+
+    function togglePw() {
+      const pw = document.getElementById('password');
+      pw.type = pw.type === 'password' ? 'text' : 'password';
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-login');
+      const alertEl = document.getElementById('login-alert');
+      alertEl.style.display = 'none';
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block"></span>&nbsp; Signing in...';
+
+      try {
+        const data = await apiFetch('/auth/login', {
+          method: 'POST',
+          body: { email: document.getElementById('email').value.trim(), password: document.getElementById('password').value }
+        });
+        setAuth(data.token, data.user);
+        showToast('Login successful! Redirecting...', 'success');
+        setTimeout(() => {
+          window.location.href = data.user.role === 'admin' ? '/admin/dashboard.html' : '/student/dashboard.html';
+        }, 600);
+      } catch (err) {
+        alertEl.className = 'alert alert-danger';
+        alertEl.innerHTML = '⚠ ' + esc(err.message);
+        alertEl.style.display = 'flex';
+        btn.disabled = false;
+        btn.textContent = 'Sign In to Portal';
+      }
+    });
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+  </script>
+</body>
+</html>

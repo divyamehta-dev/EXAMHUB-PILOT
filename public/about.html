@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>About Us — ExamHub</title>
+  <meta name="description" content="About ExamHub" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --indigo-900: #1e1b4b; --indigo-800: #312e81; --indigo-700: #3730a3;
+      --indigo-600: #4f46e5; --indigo-500: #6366f1; --indigo-400: #818cf8;
+      --indigo-100: #e0e7ff; --indigo-50: #eef2ff;
+      --violet-600: #7c3aed; --violet-500: #8b5cf6;
+      --slate-900: #0f172a; --slate-800: #1e293b; --slate-700: #334155;
+      --slate-600: #475569; --slate-500: #64748b; --slate-400: #94a3b8;
+      --slate-200: #e2e8f0; --slate-100: #f1f5f9; --slate-50: #f8fafc;
+      --emerald-500: #10b981; --white: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--slate-700); line-height: 1.7; }
+    
+    nav {
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--slate-200); position: sticky; top: 0; z-index: 100;
+      padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--indigo-700); text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--indigo-600), var(--violet-600)); border-radius: 8px; display: grid; place-items: center; font-size: 1rem; color: white; }
+    .nav-back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border: 1.5px solid var(--slate-200); border-radius: 8px; color: var(--slate-600); font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .nav-back:hover { border-color: var(--indigo-300); color: var(--indigo-600); background: var(--indigo-50); }
+
+    .page-hero {
+      background: linear-gradient(135deg, var(--indigo-900) 0%, var(--indigo-800) 50%, var(--violet-600) 100%);
+      padding: 72px 40px 80px; text-align: center; position: relative; overflow: hidden;
+    }
+    .page-hero h1 { font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; color: var(--white); margin-bottom: 14px; letter-spacing: -0.02em; }
+    .page-hero p { color: rgba(255,255,255,0.7); font-size: 1rem; }
+    
+    .container { max-width: 800px; margin: 60px auto; padding: 0 20px; }
+    h2 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; color: var(--slate-900); margin-top: 40px; margin-bottom: 16px; }
+    p { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-icon">🎓</div>
+      ExamHub
+    </a>
+    <a href="/" class="nav-back">← Back to Home</a>
+  </nav>
+
+  <section class="page-hero">
+    <div class="page-hero-inner">
+      <h1>About ExamHub</h1>
+      <p>Empowering educators with seamless online examinations.</p>
+    </div>
+  </section>
+
+  <div class="container">
+    <h2>Our Mission</h2>
+    <p>At ExamHub, our mission is to simplify and secure the online examination process for universities, colleges, and coaching institutes worldwide. We believe that technology should empower educators, not complicate their workflows.</p>
+
+    <h2>Who We Are</h2>
+    <p>We are a passionate team of technologists, educators, and designers dedicated to building the best possible examination platform. Since our founding, we have worked closely with academic institutions to understand their unique challenges and build features that address their exact needs.</p>
+
+    <h2>Our Values</h2>
+    <p><strong>Security:</strong> We employ bank-grade security protocols to ensure that exams are fair and data is protected.</p>
+    <p><strong>Scalability:</strong> Built on modern cloud infrastructure, our platform can handle hundreds of thousands of concurrent users without breaking a sweat.</p>
+    <p><strong>User Experience:</strong> We design intuitive, beautifully crafted interfaces for both students taking the exams and the administrators managing them.</p>
+
+    <h2>Get in Touch</h2>
+    <p>If you'd like to learn more about how ExamHub can transform your institution's assessment processes, we'd love to hear from you. Contact us at <a href="mailto:teamhydroxy@Hotmail.com">teamhydroxy@Hotmail.com</a>.</p>
+  </div>
+</body>
+</html>

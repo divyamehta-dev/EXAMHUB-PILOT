@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Completion</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600&display=swap');
+    body, html { margin: 0; padding: 0; min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: #e5e7eb; font-family: 'Inter', sans-serif; padding: 60px 20px; }
+    .certificate-scale-wrapper {
+      /* Scale the 1000px certificate to fit any viewport */
+      width: 1000px;
+      transform-origin: top center;
+    }
+    .certificate-wrapper { width: 1000px; height: 700px; background: white; padding: 20px; box-sizing: border-box; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+    .certificate-border { border: 10px solid #1e4d9a; height: 100%; box-sizing: border-box; padding: 40px; text-align: center; position: relative; display: flex; flex-direction: column; justify-content: center; }
+    .certificate-logo { font-size: 50px; margin-bottom: 20px; }
+    .certificate-title { font-family: 'Playfair Display', serif; font-size: 48px; color: #1e4d9a; margin: 0 0 10px 0; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    .certificate-subtitle { font-size: 18px; color: #6b7280; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 50px; }
+    .certificate-text { font-size: 20px; color: #374151; margin-bottom: 20px; }
+    .certificate-name { font-family: 'Playfair Display', serif; font-size: 56px; color: #111827; margin: 0 0 30px 0; border-bottom: 2px solid #d1d5db; display: inline-block; padding: 0 40px 10px; font-weight: 700; font-style: italic; }
+    .certificate-description { font-size: 20px; color: #374151; line-height: 1.6; max-width: 700px; margin: 0 auto 50px auto; }
+    .certificate-footer { display: flex; justify-content: space-between; margin-top: auto; padding: 0 60px; }
+    .signature-block { text-align: center; }
+    .signature-line { width: 250px; border-bottom: 2px solid #111827; margin-bottom: 10px; height: 40px; display: flex; align-items: flex-end; justify-content: center; font-family: 'Playfair Display', serif; font-size: 28px; color: #1e4d9a; }
+    .signature-label { font-size: 14px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+    
+    .print-btn { position: fixed; top: 20px; right: 20px; background: #1e4d9a; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; font-weight: 600; font-family: 'Inter', sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 10; }
+    .print-btn:hover { background: #153060; }
+    @media print { .print-btn { display: none; } body { background: white; padding: 0; } .certificate-scale-wrapper { width: 100% !important; transform: none !important; } .certificate-wrapper { box-shadow: none; width: 100%; height: 100vh; padding: 0; } }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+
+  <div class="certificate-scale-wrapper" id="cert-scale">
+    <div class="certificate-wrapper">
+      <div class="certificate-border">
+        <div class="certificate-logo">🎓</div>
+        <h1 class="certificate-title">Certificate of Completion</h1>
+        <div class="certificate-subtitle">This is to proudly certify that</div>
+        
+        <div class="certificate-name" id="c-name">Student Name</div>
+        
+        <div class="certificate-description">
+          has successfully completed the examination for 
+          <strong id="c-exam" style="color: #1e4d9a;">Exam Title</strong><br>
+          achieving a score of <strong id="c-score">0%</strong> and passing with excellence.
+        </div>
+        
+        <div class="certificate-footer">
+          <div class="signature-block">
+            <div class="signature-line" id="c-date">Date</div>
+            <div class="signature-label">Date of Issue</div>
+          </div>
+          <div class="signature-block">
+            <div class="signature-line">ExamHub Admin</div>
+            <div class="signature-label">Authorized Signature</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(location.search);
+    document.getElementById('c-name').textContent = params.get('name') || 'Student Name';
+    document.getElementById('c-exam').textContent = params.get('exam') || 'Exam Title';
+    document.getElementById('c-score').textContent = (params.get('score') || '0') + '%';
+    
+    const dateStr = params.get('date');
+    if (dateStr) {
+      document.getElementById('c-date').textContent = new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    } else {
+      document.getElementById('c-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    // Responsive scaling: shrink certificate to fit viewport width
+    function scaleCertificate() {
+      const wrapper = document.getElementById('cert-scale');
+      const availableWidth = window.innerWidth - 40; // 20px padding each side
+      const scale = Math.min(1, availableWidth / 1000);
+      wrapper.style.transform = `scale(${scale})`;
+      // Adjust body height so the scaled element doesn't leave blank space
+      wrapper.style.marginBottom = `${-(700 * (1 - scale))}px`;
+    }
+    scaleCertificate();
+    window.addEventListener('resize', scaleCertificate);
+  </script>
+</body>
+</html>

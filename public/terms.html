@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Terms of Service — ExamHub (Indian Statutory Standards)</title>
+  <meta name="description" content="ExamHub Terms of Service — Governed by Indian Contract Act 1872, IT Act 2000, and Arbitration & Conciliation Act 1996." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --indigo-900: #1e1b4b; --indigo-800: #312e81; --indigo-700: #3730a3;
+      --indigo-600: #4f46e5; --indigo-500: #6366f1; --indigo-400: #818cf8;
+      --indigo-100: #e0e7ff; --indigo-50: #eef2ff;
+      --violet-600: #7c3aed; --violet-500: #8b5cf6;
+      --amber-600: #d97706; --amber-50: #fffbeb; --amber-100: #fde68a;
+      --red-600: #dc2626; --red-50: #fef2f2; --red-100: #fecaca;
+      --emerald-600: #059669; --emerald-50: #ecfdf5; --emerald-100: #a7f3d0;
+      --slate-900: #0f172a; --slate-800: #1e293b; --slate-700: #334155;
+      --slate-600: #475569; --slate-500: #64748b; --slate-400: #94a3b8;
+      --slate-200: #e2e8f0; --slate-100: #f1f5f9; --slate-50: #f8fafc;
+      --white: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--slate-700); line-height: 1.7; }
+
+    nav {
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--slate-200); position: sticky; top: 0; z-index: 100;
+      padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 800; color: var(--indigo-700); text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--indigo-600), var(--violet-600)); border-radius: 8px; display: grid; place-items: center; font-size: 1rem; }
+    .nav-back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border: 1.5px solid var(--slate-200); border-radius: 8px; color: var(--slate-600); font-size: 0.875rem; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+    .nav-back:hover { border-color: var(--indigo-300); color: var(--indigo-600); background: var(--indigo-50); }
+
+    .page-hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #6d28d9 100%);
+      padding: 72px 40px 80px; text-align: center; position: relative; overflow: hidden;
+    }
+    .page-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 60px 60px; }
+    .page-hero-inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; }
+    .page-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; color: #c7d2fe; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 20px; }
+    .page-hero h1 { font-family: 'Outfit', sans-serif; font-size: clamp(2rem, 5vw, 3rem); font-weight: 900; color: var(--white); margin-bottom: 14px; letter-spacing: -0.02em; }
+    .page-hero p { color: rgba(255,255,255,0.7); font-size: 1rem; }
+    .page-hero-meta { display: flex; align-items: center; justify-content: center; gap: 24px; margin-top: 24px; flex-wrap: wrap; }
+    .page-hero-meta span { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: rgba(255,255,255,0.55); }
+
+    .doc-layout { display: grid; grid-template-columns: 260px 1fr; gap: 48px; max-width: 1100px; margin: 0 auto; padding: 60px 40px; align-items: start; }
+    .doc-toc { position: sticky; top: 84px; }
+    .toc-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--slate-400); margin-bottom: 16px; }
+    .toc-list { list-style: none; }
+    .toc-list li a { display: block; padding: 7px 12px; font-size: 0.85rem; color: var(--slate-500); text-decoration: none; border-radius: 7px; transition: all 0.2s; border-left: 2px solid transparent; }
+    .toc-list li a:hover { color: var(--indigo-600); background: var(--indigo-50); border-left-color: var(--indigo-400); }
+    .toc-list li a.active { color: var(--indigo-600); background: var(--indigo-50); border-left-color: var(--indigo-600); font-weight: 600; }
+
+    .doc-content { min-width: 0; }
+    .doc-section { margin-bottom: 56px; padding-bottom: 56px; border-bottom: 1px solid var(--slate-100); }
+    .doc-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .doc-section h2 { font-family: 'Outfit', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--slate-900); margin-bottom: 16px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+    .doc-section h2 .section-icon { font-size: 1.1rem; }
+    .doc-section h3 { font-size: 1rem; font-weight: 700; color: var(--slate-800); margin: 24px 0 10px; }
+    .doc-section p { font-size: 0.95rem; color: var(--slate-600); margin-bottom: 14px; }
+    .doc-section p:last-child { margin-bottom: 0; }
+    .doc-section ul, .doc-section ol { padding-left: 24px; margin-bottom: 14px; }
+    .doc-section li { font-size: 0.95rem; color: var(--slate-600); margin-bottom: 8px; }
+    .doc-section li strong { color: var(--slate-800); }
+
+    .info-box { background: var(--indigo-50); border: 1px solid var(--indigo-100); border-radius: 12px; padding: 18px 22px; margin: 20px 0; font-size: 0.9rem; color: var(--indigo-700); display: flex; gap: 12px; align-items: flex-start; }
+    .info-box-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+    .warning-box { background: var(--amber-50); border: 1px solid var(--amber-100); border-radius: 12px; padding: 18px 22px; margin: 20px 0; font-size: 0.9rem; color: var(--amber-600); display: flex; gap: 12px; align-items: flex-start; }
+    .danger-box { background: var(--red-50); border: 1px solid var(--red-100); border-radius: 12px; padding: 18px 22px; margin: 20px 0; font-size: 0.9rem; color: var(--red-600); display: flex; gap: 12px; align-items: flex-start; }
+    .success-box { background: var(--emerald-50); border: 1px solid var(--emerald-100); border-radius: 12px; padding: 18px 22px; margin: 20px 0; font-size: 0.9rem; color: var(--emerald-600); display: flex; gap: 12px; align-items: flex-start; }
+
+    .highlight-box { background: var(--slate-50); border-left: 4px solid var(--indigo-500); border-radius: 0 10px 10px 0; padding: 16px 20px; margin: 20px 0; }
+    .highlight-box p { margin: 0; font-size: 0.9rem; color: var(--slate-600); }
+
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.875rem; }
+    th { background: var(--slate-100); padding: 10px 16px; text-align: left; font-weight: 700; color: var(--slate-700); border: 1px solid var(--slate-200); }
+    td { padding: 10px 16px; color: var(--slate-600); border: 1px solid var(--slate-200); }
+    tr:nth-child(even) td { background: var(--slate-50); }
+    code { background: var(--slate-100); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; font-family: 'Roboto Mono', monospace; color: var(--indigo-700); }
+
+    .doc-footer { background: var(--slate-900); color: rgba(255,255,255,0.5); padding: 40px; text-align: center; font-size: 0.85rem; }
+    .doc-footer a { color: #818cf8; text-decoration: none; }
+    .doc-footer a:hover { color: var(--white); }
+    .doc-footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+
+    @media (max-width: 768px) {
+      .doc-layout { grid-template-columns: 1fr; padding: 40px 20px; }
+      .doc-toc { display: none; }
+      nav { padding: 0 20px; }
+      .page-hero { padding: 56px 20px 64px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon">🎓</div>
+    ExamHub
+  </a>
+  <a href="/" class="nav-back">← Back to Home</a>
+</nav>
+
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-badge">🇮🇳 Indian Statutory Standards</div>
+    <h1>Terms of Service</h1>
+    <p>Governed by the Indian Contract Act 1872 &amp; Information Technology Act 2000.</p>
+    <div class="page-hero-meta">
+      <span>📅 Last updated: July 22, 2025</span>
+      <span>📜 Electronic Contract pursuant to Sec 10A of IT Act 2000</span>
+    </div>
+  </div>
+</div>
+
+<div class="doc-layout">
+  <aside class="doc-toc">
+    <p class="toc-title">On This Page</p>
+    <ul class="toc-list">
+      <li><a href="#acceptance" class="active">1. Legal Contract & Acceptance</a></li>
+      <li><a href="#description">2. Scope of SaaS Services</a></li>
+      <li><a href="#accounts">3. User Authentication & Credentials</a></li>
+      <li><a href="#institution">4. Institutional Obligations</a></li>
+      <li><a href="#conduct">5. Candidate Conduct & Academic Integrity</a></li>
+      <li><a href="#prohibited">6. Intermediary Due Diligence</a></li>
+      <li><a href="#ip">7. Intellectual Property & Rights</a></li>
+      <li><a href="#commercials">8. Commercial Terms & GST</a></li>
+      <li><a href="#sla">9. Service Levels & Availability</a></li>
+      <li><a href="#liability">10. Limitation of Liability</a></li>
+      <li><a href="#indemnity">11. Indemnification</a></li>
+      <li><a href="#termination">12. Termination & Exit Assistance</a></li>
+      <li><a href="#dispute">13. Arbitration & Jurisdiction</a></li>
+      <li><a href="#grievance">14. Grievance Officer Details</a></li>
+    </ul>
+  </aside>
+
+  <main class="doc-content">
+
+    <div class="doc-section" id="acceptance">
+      <h2><span class="section-icon">📜</span> 1. Legal Contract &amp; Acceptance</h2>
+      <div class="info-box">
+        <span class="info-box-icon">⚖️</span>
+        <span>This agreement is an <strong>Electronic Record</strong> generated under the <strong>Information Technology Act, 2000</strong> and rules made thereunder, including the amended provisions pertaining to electronic records in various statutes as amended by the IT Act, 2000. This electronic record is generated by a computer system and does not require physical or digital signatures pursuant to <strong>Section 10A of the IT Act, 2000</strong>.</span>
+      </div>
+      <p>These Terms of Service ("Terms") govern your relationship with <strong>ExamHub Technologies Private Limited</strong> ("ExamHub", "Company", "We", "Us", or "Our"), incorporated under the Indian Companies Act, 2013. By accessing or using the ExamHub portal, APIs, or assessment modules, you ("Client", "Institution", "User", or "Candidate") enter into a binding contract governed by the <strong>Indian Contract Act, 1872</strong>.</p>
+    </div>
+
+    <div class="doc-section" id="description">
+      <h2><span class="section-icon">🖥️</span> 2. Scope of SaaS Services</h2>
+      <p>ExamHub provides a cloud-native Software-as-a-Service (SaaS) examination infrastructure designed in alignment with <strong>UGC / AICTE guidelines for online examination delivery</strong>. Key capabilities include:</p>
+      <ul>
+        <li>Creation, categorization, and encryption of question banks (MCQ, MSQ, Descriptive)</li>
+        <li>Automated section timing, negative marking calculations, and candidate score generation</li>
+        <li>Proctoring telemetry logging (tab-switch detection, browser event capture, audit trail)</li>
+        <li>Real-time administrative dashboards, result processing, and merit list exports</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="accounts">
+      <h2><span class="section-icon">🔐</span> 3. User Authentication &amp; Credential Safety</h2>
+      <p>Pursuant to statutory due diligence under Indian cyber laws:</p>
+      <ul>
+        <li>Users must maintain strict confidentiality of authentication credentials. Sharing login credentials, access tokens, or candidate roll numbers is strictly prohibited under <strong>Section 43 of the IT Act, 2000</strong>.</li>
+        <li>Subscribing Institutions must promptly notify ExamHub of any unauthorized account compromise at <strong>security@examhub.io</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="institution">
+      <h2><span class="section-icon">🏛️</span> 4. Institutional Obligations</h2>
+      <p>Educational institutions, universities, and academies subscribing to ExamHub agree to:</p>
+      <ul>
+        <li>Obtain necessary statutory consents from candidates for data processing under the <strong>DPDP Act 2023</strong>.</li>
+        <li>Ensure all uploaded question banks and assessment materials do not violate third-party copyrights under the <strong>Indian Copyright Act, 1957</strong>.</li>
+        <li>Designate authorized administrators responsible for student enrollment, examination scheduling, and final result publication.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="conduct">
+      <h2><span class="section-icon">🎓</span> 5. Candidate Conduct &amp; Academic Integrity</h2>
+      <p>Candidates appearing for assessments delivered via ExamHub explicitly agree that:</p>
+      <ul>
+        <li>All responses submitted are the candidate's sole, independent work.</li>
+        <li>Using unauthorized secondary devices, proxy test-takers, virtual machines, or browser exploits constitutes <strong>cyber malpractice under Section 66D of the Information Technology Act, 2000</strong> (Punishment for cheating by personation by using computer resource).</li>
+        <li>Violations logged by proctoring algorithms will be reported to the Client University/Institution for statutory disciplinary action.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="prohibited">
+      <h2><span class="section-icon">🚫</span> 6. Intermediary Due Diligence (Rule 3(1) Compliance)</h2>
+      <p>In terms of <strong>Rule 3(1)(b) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021</strong>, Users shall not host, display, upload, modify, publish, transmit, store, update, or share any information that:</p>
+      <ul>
+        <li>Belongs to another person and to which the user does not have any right;</li>
+        <li>Is defamatory, obscene, pornographic, pedophilic, invasive of another's privacy, or libelous;</li>
+        <li>Infringes any patent, trademark, copyright, or other proprietary rights;</li>
+        <li>Threatens the unity, integrity, defense, security, or sovereignty of India, friendly relations with foreign States, or public order;</li>
+        <li>Contains software viruses or any other computer code designed to interrupt, destroy, or limit the functionality of any computer resource.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="ip">
+      <h2><span class="section-icon">©️</span> 7. Intellectual Property Rights</h2>
+      <p>All software source code, database architectures, user interface components, trademarks, and logos associated with ExamHub are the exclusive intellectual property of <strong>ExamHub Technologies Private Limited</strong>, protected under the <strong>Copyright Act 1957</strong> and <strong>Trade Marks Act 1999</strong>.</p>
+      <p>Client question banks, candidate responses, and institution branding remain the exclusive intellectual property of the Client Institution.</p>
+    </div>
+
+    <div class="doc-section" id="commercials">
+      <h2><span class="section-icon">💳</span> 8. Commercial Terms, GST &amp; Invoicing</h2>
+      <p>Commercial transactions are governed by Indian tax regulations and the <strong>Central Goods and Services Tax (CGST) Act, 2017</strong> / <strong>Integrated Goods and Services Tax (IGST) Act, 2017</strong>:</p>
+      <ul>
+        <li><strong>Taxation:</strong> Subscriptions are subject to applicable GST (18% for OIDAR / SaaS Services). Tax invoices will be issued with valid GSTIN details.</li>
+        <li><strong>Payment Schedule:</strong> Fees are payable in advance as per the agreed commercial proposal or billing plan.</li>
+        <li><strong>Consumer Rights:</strong> Governed by the <strong>Consumer Protection (E-Commerce) Rules, 2020</strong>. Refund claims for service non-performance are processed within 14 working days of verified service failure.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="sla">
+      <h2><span class="section-icon">📈</span> 9. Service Level Agreement (SLA)</h2>
+      <p>ExamHub targets <strong>99.9% platform availability</strong> during scheduled examination windows. Planned maintenance windows will be communicated at least 48 hours in advance. Performance credits for verified downtime will be applied against subsequent invoice cycles.</p>
+    </div>
+
+    <div class="doc-section" id="liability">
+      <h2><span class="section-icon">⚖️</span> 10. Limitation of Liability</h2>
+      <p>To the maximum extent permitted under Indian law, ExamHub's total financial liability for any claim arising out of or relating to the service shall be limited to the total fees actually received by ExamHub from the Client in the three (3) months preceding the incident.</p>
+    </div>
+
+    <div class="doc-section" id="indemnity">
+      <h2><span class="section-icon">🛡️</span> 11. Indemnification</h2>
+      <p>The Client agrees to indemnify and hold harmless ExamHub, its directors, and employees against any claims, losses, or legal costs arising from: (a) breach of candidate data privacy obligations by the Client; (b) copyright infringement in Client question banks; or (c) candidate disputes regarding institution grading decisions.</p>
+    </div>
+
+    <div class="doc-section" id="termination">
+      <h2><span class="section-icon">🔚</span> 12. Termination &amp; Data Exit Assistance</h2>
+      <p>Upon contract expiration or lawful termination, ExamHub shall provide thirty (30) days exit assistance to enable the Client to export candidate scorecards, audit logs, and question banks in standard CSV/JSON format, after which data will be sanitized in accordance with CERT-In standards.</p>
+    </div>
+
+    <div class="doc-section" id="dispute">
+      <h2><span class="section-icon">🇮🇳</span> 13. Dispute Resolution &amp; Arbitration</h2>
+      <p>Any dispute, controversy, or claim arising out of or relating to this agreement shall be settled through binding arbitration in accordance with the <strong>Arbitration and Conciliation Act, 1996</strong> (as amended):</p>
+      <ul>
+        <li><strong>Arbitration Seat &amp; Venue:</strong> New Delhi, India</li>
+        <li><strong>Tribunal:</strong> Sole Arbitrator mutually appointed by both parties</li>
+        <li><strong>Language:</strong> English</li>
+        <li><strong>Courts of Jurisdiction:</strong> Exclusive jurisdiction of the competent Courts at <strong>New Delhi, India</strong>.</li>
+      </ul>
+    </div>
+
+    <div class="doc-section" id="grievance">
+      <h2><span class="section-icon">👨‍⚖️</span> 14. Statutory Grievance Redressal Officer</h2>
+      <p>As mandated under Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, the contact details of our Grievance Officer are:</p>
+      <div class="info-box" style="background: var(--slate-50); border: 1px solid var(--slate-200); color: var(--slate-800);">
+        <span class="info-box-icon">📋</span>
+        <div>
+          <strong style="color: var(--indigo-700);">Grievance Officer</strong><br/>
+          <strong>ExamHub Technologies Private Limited</strong><br/>
+          Registered Office: New Delhi - 110001, India<br/>
+          Email: <a href="mailto:grievance@examhub.io" style="color: var(--indigo-600); font-weight:700;">grievance@examhub.io</a><br/>
+          Acknowledgment: Within 24 hours | Resolution: Within 15 business days.
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<footer class="doc-footer">
+  <div class="doc-footer-links">
+    <a href="/">Home</a>
+    <a href="/privacy.html">Privacy Policy</a>
+    <a href="/terms.html">Terms of Service</a>
+    <a href="mailto:legal@examhub.io">Legal Contact</a>
+  </div>
+  <p>© 2025 ExamHub Technologies Private Limited · Incorporated under Companies Act, 2013 (India) · All rights reserved.</p>
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('.doc-section');
+  const tocLinks = document.querySelectorAll('.toc-list li a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        tocLinks.forEach(a => a.classList.remove('active'));
+        const active = document.querySelector(`.toc-list li a[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-10% 0px -80% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

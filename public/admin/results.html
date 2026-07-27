@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Results & Grading — ExamHub Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="top-bar"><div class="top-bar-brand"><div class="top-bar-logo">🎓</div> ExamHub Admin</div><div class="top-bar-right"><button class="btn btn-secondary btn-sm" onclick="logout()" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)">Sign Out</button></div></div>
+    <nav class="navbar" id="navbar"></nav>
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div><h1>Results & Grading</h1><p>View submissions, grade subjective questions, export CSV</p></div>
+        <div style="display:flex;gap:8px">
+          <select class="form-control" id="filter-exam" style="width:220px" onchange="filterChanged()"><option value="">All Exams</option></select>
+          <button class="btn btn-secondary" id="btn-export" onclick="exportCSV()" disabled>📥 Export CSV</button>
+        </div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="container">
+        <!-- Summary Stats -->
+        <div class="grid grid-4" id="result-stats" style="margin-bottom:20px;display:none"></div>
+        <div id="results-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grade Modal -->
+  <div class="modal-overlay" id="modal-grade">
+    <div class="modal" style="max-width:700px;max-height:92vh">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">Grade Submission</h3>
+          <p class="card-subtitle" id="grade-candidate-info"></p>
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-grade')">✕</button>
+      </div>
+      <div id="grade-content" style="overflow-y:auto;max-height:calc(92vh - 160px)"></div>
+      <div style="display:flex;justify-content:space-between;padding-top:14px;border-top:1px solid var(--border);margin-top:14px">
+        <button class="btn btn-outline" onclick="autoGradeAll()">✨ Auto-Grade All</button>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-secondary" onclick="closeModal('modal-grade')">Cancel</button>
+          <button class="btn btn-primary" id="btn-submit-grades" onclick="submitGrades()">Save Grades</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Proctoring Log Modal -->
+  <div class="modal-overlay" id="modal-proctor">
+    <div class="modal" style="max-width:660px;max-height:92vh">
+      <div class="modal-header">
+        <div>
+          <h3 class="modal-title">🔐 Proctoring Log</h3>
+          <p class="card-subtitle" id="proctor-candidate-info"></p>
+        </div>
+        <button class="modal-close" onclick="closeModal('modal-proctor')">✕</button>
+      </div>
+
+      <!-- Violation Summary Bar -->
+      <div id="proctor-summary" style="margin-bottom:14px"></div>
+
+      <!-- Log List -->
+      <div id="proctor-log-list" style="overflow-y:auto;max-height:calc(92vh - 220px)"></div>
+
+      <div style="display:flex;justify-content:flex-end;padding-top:14px;border-top:1px solid var(--border);margin-top:14px">
+        <button class="btn btn-secondary" onclick="closeModal('modal-proctor')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth('admin');
+    buildNavbar('Results');
+
+    let allResults = [], exams = [], currentResultId = null, gradeData = {};
+    const params = new URLSearchParams(location.search);
+
+    async function loadData() {
+      try {
+        showLoading();
+        [allResults, exams] = await Promise.all([apiFetch('/results'), apiFetch('/exams')]);
+        hideLoading();
+
+        // populate filter
+        const fe = document.getElementById('filter-exam');
+        exams.forEach(e => fe.innerHTML += `<option value="${e.id}">${esc(e.title)}</option>`);
+
+        const preId = params.get('examId');
+        if (preId) fe.value = preId;
+
+        filterChanged();
+      } catch (err) { hideLoading(); showToast('Load error: ' + err.message, 'error'); }
+    }
+
+    function filterChanged() {
+      const examId = document.getElementById('filter-exam').value;
+      const results = examId ? allResults.filter(r => r.exam_id === examId) : allResults;
+      document.getElementById('btn-export').disabled = !examId;
+      renderStats(results);
+      renderTable(results);
+    }
+
+    function renderStats(results) {
+      const submitted = results.filter(r => ['submitted','graded'].includes(r.status));
+      const passed = submitted.filter(r => r.passed).length;
+      const avg = submitted.length ? submitted.reduce((s, r) => s + (r.percentage||0), 0) / submitted.length : 0;
+      const pending = results.filter(r => r.status === 'in_progress').length;
+
+      document.getElementById('result-stats').innerHTML = [
+        { label: 'Submissions', val: submitted.length, color: 'blue' },
+        { label: 'Passed', val: passed, color: 'green' },
+        { label: 'Failed', val: submitted.length - passed, color: 'red' },
+        { label: 'Avg Score', val: submitted.length ? avg.toFixed(1) + '%' : '—', color: 'blue' }
+      ].map(s => `<div class="stat-card ${s.color}"><div class="stat-icon ${s.color}">${['📊','✅','✕','📈'][['blue','green','red','blue'].indexOf(s.color)]}</div><div><div class="stat-value">${s.val}</div><div class="stat-label">${s.label}</div></div></div>`).join('');
+      document.getElementById('result-stats').style.display = 'grid';
+    }
+
+    function renderTable(results) {
+      const el = document.getElementById('results-table');
+      if (!results.length) {
+        el.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">📭</div><h3>No results found</h3><p>Results will appear here after students submit exams.</p></div></div>`;
+        return;
+      }
+
+      const sorted = [...results].sort((a,b) => (b.total_score||0) - (a.total_score||0));
+      el.innerHTML = `<div class="table-wrapper"><table>
+        <thead><tr><th>Rank</th><th>Candidate</th><th>Exam</th><th>Score</th><th>Percentage</th><th>Time</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${sorted.map((r, i) => `<tr>
+            <td style="font-weight:700;color:${i<3?'var(--warning)':'var(--text-muted)'}">${i+1}</td>
+            <td>
+              <div style="font-weight:700">${esc(r.student_name||'Unknown')}</div>
+              ${r.roll_number ? `<div style="font-size:.75rem;color:var(--text-muted)">${esc(r.roll_number)}</div>` : ''}
+            </td>
+            <td style="font-size:.82rem">${esc(r.exams?.title||'—')}</td>
+            <td style="font-weight:700;color:${r.passed?'var(--success)':'var(--danger)'}">
+              ${r.total_score}/${r.total_marks}
+            </td>
+            <td>
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="progress" style="width:70px"><div class="progress-fill${r.passed?' success':' danger'}" style="width:${r.percentage||0}%"></div></div>
+                <span style="font-size:.8rem;font-weight:600">${(r.percentage||0).toFixed(1)}%</span>
+              </div>
+            </td>
+            <td style="font-size:.8rem;color:var(--text-muted)">${formatTime(r.time_taken)}</td>
+            <td>${
+              r.status === 'in_progress'   ? '<span class="badge badge-warning">In Progress</span>' :
+              r.status === 'graded'        ? '<span class="badge badge-blue">Graded</span>' :
+              r.passed                     ? '<span class="badge badge-success">Pass</span>' :
+                                             '<span class="badge badge-danger">Fail</span>'
+            }</td>
+            <td style="font-size:.78rem;color:var(--text-muted)">${formatDateTime(r.submitted_at)}</td>
+            <td>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="btn btn-secondary btn-sm" onclick="gradeResult('${r.id}')">Grade</button>
+                <button class="btn btn-sm" style="background:#7c3aed;color:#fff;border:none;cursor:pointer" onclick="viewProctoring('${r.id}','${esc(r.student_name||'')}')"
+                  title="View proctoring log">
+                  ${(r.tab_switches||0) + (r.fullscreen_exits||0) > 0 ? '🚨' : '🔐'} Proctor
+                  ${(r.tab_switches||0) + (r.fullscreen_exits||0) > 0 ? `<span style="background:#fff;color:#7c3aed;border-radius:4px;padding:0 4px;font-size:.68rem;font-weight:800;margin-left:4px">${(r.tab_switches||0)+(r.fullscreen_exits||0)}</span>` : ''}
+                </button>
+              </div>
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table></div>`;
+    }
+
+    async function viewProctoring(resultId, candidateName) {
+      try {
+        showLoading('Loading proctoring log...');
+        // Fetch proctoring logs from server
+        const result = await apiFetch(`/results/${resultId}`);
+        // Fetch logs directly via Supabase REST (or use our own endpoint)
+        const logs = await apiFetch(`/proctor/logs/${resultId}`);
+        hideLoading();
+
+        document.getElementById('proctor-candidate-info').textContent =
+          `${candidateName} · Tab Switches: ${result.tab_switches||0} · Fullscreen Exits: ${result.fullscreen_exits||0}`;
+
+        // Violation summary
+        const types = {};
+        (logs || []).forEach(l => { types[l.event_type] = (types[l.event_type]||0) + 1; });
+        const typeConfig = {
+          tab_switch:          { label: 'Tab Switches',       color: '#dc2626', icon: '🔄' },
+          fullscreen_exit:     { label: 'Fullscreen Exits',   color: '#d97706', icon: '⛶'  },
+          copy_attempt:        { label: 'Copy/Cut Attempts',  color: '#7c3aed', icon: '📋' },
+          paste_attempt:       { label: 'Paste Attempts',     color: '#7c3aed', icon: '📋' },
+          context_menu:        { label: 'Right-Click',        color: '#6b7280', icon: '🖱️' },
+          focus_loss:          { label: 'Focus Lost',         color: '#d97706', icon: '👁️' },
+          suspicious_activity: { label: 'Suspicious Activity',color: '#dc2626', icon: '🚨' }
+        };
+
+        const summaryHTML = Object.entries(types).length
+          ? `<div style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 0">
+              ${Object.entries(types).map(([type, count]) => {
+                const cfg = typeConfig[type] || { label: type, color: '#6b7280', icon: '⚠' };
+                return `<div style="display:flex;align-items:center;gap:6px;background:${cfg.color}15;border:1px solid ${cfg.color}40;border-radius:6px;padding:6px 10px">
+                  <span style="font-size:1rem">${cfg.icon}</span>
+                  <span style="font-size:.78rem;font-weight:700;color:${cfg.color}">${count}×</span>
+                  <span style="font-size:.78rem;color:var(--text-secondary)">${cfg.label}</span>
+                </div>`;
+              }).join('')}
+            </div>`
+          : `<div style="padding:12px;background:var(--success-bg);border:1px solid var(--success-border);border-radius:6px;color:#166534;font-size:.85rem;font-weight:600">
+              ✅ No proctoring violations recorded for this submission.
+            </div>`;
+
+        document.getElementById('proctor-summary').innerHTML = summaryHTML;
+
+        // Log list
+        const logEl = document.getElementById('proctor-log-list');
+        if (!logs || !logs.length) {
+          logEl.innerHTML = `<div class="empty-state" style="padding:24px"><p>No proctoring events recorded.</p></div>`;
+        } else {
+          logEl.innerHTML = logs.map((log, i) => {
+            const cfg = typeConfig[log.event_type] || { label: log.event_type, color: '#6b7280', icon: '⚠' };
+            return `<div style="display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border);${i%2===0?'background:var(--bg-page)':''}">
+              <span style="font-size:1.1rem;flex-shrink:0">${cfg.icon}</span>
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:.82rem;color:${cfg.color}">${cfg.label}</div>
+                <div style="font-size:.78rem;color:var(--text-muted)">${esc(log.details||'')}</div>
+              </div>
+              <div style="font-size:.72rem;color:var(--text-muted);white-space:nowrap">${formatDateTime(log.timestamp)}</div>
+            </div>`;
+          }).join('');
+        }
+
+        openModal('modal-proctor');
+      } catch (err) { hideLoading(); showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function gradeResult(id) {
+      currentResultId = id;
+      gradeData = {};
+      try {
+        showLoading('Loading submission...');
+        const result = await apiFetch(`/results/${id}`);
+        hideLoading();
+
+        document.getElementById('grade-candidate-info').textContent = `${result.student_name} · ${result.exams?.title} · ${(result.percentage||0).toFixed(1)}%`;
+
+        const subjective = (result.result_answers || []).filter(a => a.questions?.type === 'subjective');
+        const gc = document.getElementById('grade-content');
+
+        if (!subjective.length) {
+          gc.innerHTML = `<div class="empty-state" style="padding:24px"><p>No subjective questions in this submission. All answers are auto-graded.</p></div>`;
+        } else {
+          gc.innerHTML = subjective.map((a, i) => `
+            <div style="padding:16px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:14px">
+              <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;color:var(--navy-600);margin-bottom:8px">Question ${i+1}</div>
+              <div style="font-size:.88rem;font-weight:600;margin-bottom:12px;padding:10px;background:var(--bg-section-bar);border-radius:4px">${esc(a.questions?.content||'')}</div>
+              <div style="margin-bottom:12px">
+                <div style="font-size:.75rem;font-weight:700;color:var(--text-muted);margin-bottom:6px">CANDIDATE'S ANSWER</div>
+                <div style="padding:10px;background:var(--bg-page);border:1px solid var(--border);border-radius:4px;font-size:.85rem;line-height:1.6;min-height:60px">${esc(a.answer_text||'(No answer)')}</div>
+              </div>
+              <div class="grid grid-2">
+                <div class="form-group">
+                  <label class="form-label required">Marks Awarded (max ${a.questions?.marks})</label>
+                  <input class="form-control" type="number" id="grade_marks_${a.id}" value="${a.marks_awarded||0}" min="0" max="${a.questions?.marks}" step="0.5" oninput="gradeData['${a.id}']={...gradeData['${a.id}'],marks:parseFloat(this.value)||0}">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Feedback to Candidate</label>
+                  <input class="form-control" type="text" id="grade_fb_${a.id}" value="${esc(a.admin_feedback||'')}" placeholder="Optional feedback..." oninput="gradeData['${a.id}']={...gradeData['${a.id}'],feedback:this.value}">
+                </div>
+              </div>
+            </div>`).join('');
+
+          // Init gradeData
+          subjective.forEach(a => {
+            gradeData[a.id] = { marks: a.marks_awarded || 0, feedback: a.admin_feedback || '' };
+          });
+        }
+        openModal('modal-grade');
+      } catch (err) { hideLoading(); showToast('Error: ' + err.message, 'error'); }
+    }
+
+    function autoGradeAll() {
+      if (!currentResultId) return;
+      const result = allResults.find(r => r.id === currentResultId);
+      if (!result) return;
+      
+      const subjective = (result.result_answers || []).filter(a => a.questions?.type === 'subjective');
+      subjective.forEach(a => {
+        const text = (a.answer_text || '').trim().toLowerCase();
+        const maxMarks = a.questions?.marks || 0;
+        let score = 0;
+        let feedback = "Too short or empty.";
+        
+        if (text.length > 50) {
+          score = maxMarks;
+          feedback = "Excellent and detailed answer.";
+        } else if (text.length > 20) {
+          score = maxMarks * 0.7;
+          feedback = "Good, but could be more detailed.";
+        } else if (text.length > 5) {
+          score = maxMarks * 0.4;
+          feedback = "Incomplete answer.";
+        }
+        
+        gradeData[a.id] = { marks: score, feedback };
+        
+        const marksInput = document.getElementById('grade_marks_' + a.id);
+        const fbInput = document.getElementById('grade_fb_' + a.id);
+        if (marksInput) marksInput.value = score;
+        if (fbInput) fbInput.value = feedback;
+      });
+      showToast('Answers auto-graded by AI heuristic!', 'success');
+    }
+
+    async function submitGrades() {
+      if (!currentResultId) return;
+      const btn = document.getElementById('btn-submit-grades');
+      btn.disabled = true; btn.textContent = 'Saving...';
+      try {
+        await apiFetch(`/results/${currentResultId}/grade`, { method: 'PUT', body: { grades: gradeData } });
+        showToast('Grades saved!', 'success');
+        closeModal('modal-grade');
+        allResults = await apiFetch('/results');
+        filterChanged();
+      } catch (err) { showToast('Error: ' + err.message, 'error'); }
+      btn.disabled = false; btn.textContent = 'Save Grades';
+    }
+
+    async function exportCSV() {
+      const examId = document.getElementById('filter-exam').value;
+      if (!examId) return;
+      try {
+        const res = await fetch(API_BASE + '/results/export/' + examId, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+        if (!res.ok) throw new Error('Export failed');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `results_${examId}.csv`; a.click();
+        URL.revokeObjectURL(url);
+      } catch (err) { showToast('Export error: ' + err.message, 'error'); }
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

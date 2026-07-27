@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Schedule & Batches — ExamHub Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+  <div class="page-wrapper">
+    <div class="top-bar">
+      <div class="top-bar-brand">
+        <div class="top-bar-logo">🎓</div> ExamHub Admin
+      </div>
+      <div class="top-bar-right"><button class="btn btn-secondary btn-sm" onclick="logout()"
+          style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)">Sign
+          Out</button></div>
+    </div>
+    <nav class="navbar" id="navbar"></nav>
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div>
+          <h1>Schedule & Batch Management</h1>
+          <p>Schedule exams and manage student enrollment</p>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateModal()">+ Schedule Exam</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="container">
+        <div id="schedules-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule Modal -->
+  <div class="modal-overlay" id="modal-schedule">
+    <div class="modal" style="max-width:540px">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-sch-title">Schedule Exam</h3>
+        <button class="modal-close" onclick="closeModal('modal-schedule')">✕</button>
+      </div>
+      <form id="schedule-form">
+        <input type="hidden" id="sch-id">
+        <div class="form-group">
+          <label class="form-label required">Exam</label>
+          <select class="form-control" id="sch-exam" required>
+            <option value="">Select exam...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label required">Batch Name</label>
+          <input class="form-control" id="sch-batch" required placeholder="e.g. Batch A — Engineering 2024">
+        </div>
+        <div class="grid grid-2">
+          <div class="form-group">
+            <label class="form-label required">Start Date & Time</label>
+            <input class="form-control" type="datetime-local" id="sch-start" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label required">End Date & Time</label>
+            <input class="form-control" type="datetime-local" id="sch-end" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Max Attempts</label>
+            <input class="form-control" type="number" id="sch-attempts" value="1" min="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-control" id="sch-active">
+              <option value="true">Active</option>
+              <option value="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-schedule')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-sch">Save Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Enrollment Modal -->
+  <div class="modal-overlay" id="modal-enroll">
+    <div class="modal" style="max-width:600px">
+      <div class="modal-header">
+        <h3 class="modal-title">Manage Enrollments</h3>
+        <button class="modal-close" onclick="closeModal('modal-enroll')">✕</button>
+      </div>
+      <div style="margin-bottom:14px">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:12px">Select students to enroll in: <strong
+            id="enroll-batch-name"></strong></p>
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input class="form-control" id="student-search" placeholder="Search by name or email..."
+            oninput="filterStudents()">
+          <button class="btn btn-primary btn-sm" onclick="saveEnrollments()">Save Enrollments</button>
+        </div>
+        <div id="students-list"
+          style="max-height:360px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius-sm)"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth('admin');
+    buildNavbar('Schedule');
+
+    let schedules = [], exams = [], students = [], currentScheduleId = null, enrolledIds = new Set();
+
+    async function loadData() {
+      try {
+        showLoading();
+        [schedules, exams, students] = await Promise.all([
+          apiFetch('/schedules'),
+          apiFetch('/exams'),
+          apiFetch('/users')
+        ]);
+        hideLoading();
+        populateExamSelect();
+        renderSchedules();
+      } catch (err) { hideLoading(); showToast('Load error: ' + err.message, 'error'); }
+    }
+
+    function populateExamSelect() {
+      document.getElementById('sch-exam').innerHTML = '<option value="">Select exam...</option>' +
+        exams.map(e => `<option value="${e.id}">${esc(e.title)}</option>`).join('');
+    }
+
+    function renderSchedules() {
+      const el = document.getElementById('schedules-list');
+      if (!schedules.length) {
+        el.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">📅</div><h3>No schedules yet</h3><p>Create a schedule to assign exams to students.</p></div></div>`;
+        return;
+      }
+      el.innerHTML = `<div class="table-wrapper"><table>
+        <thead><tr><th>Exam</th><th>Batch</th><th>Start</th><th>End</th><th>Attempts</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${schedules.map(s => {
+        const now = new Date();
+        const start = new Date(s.start_time);
+        const end = new Date(s.end_time);
+        let statusBadge = '<span class="badge badge-grey">Scheduled</span>';
+        if (now >= start && now <= end && s.is_active) statusBadge = '<span class="badge badge-success">🟢 Live</span>';
+        else if (now > end) statusBadge = '<span class="badge badge-grey">Ended</span>';
+        else if (!s.is_active) statusBadge = '<span class="badge badge-danger">Inactive</span>';
+        return `<tr>
+              <td style="font-weight:600">${esc(s.exams?.title || '—')}</td>
+              <td>${esc(s.batch_name)}</td>
+              <td style="font-size:.8rem;color:var(--text-muted)">${formatDateTime(s.start_time)}</td>
+              <td style="font-size:.8rem;color:var(--text-muted)">${formatDateTime(s.end_time)}</td>
+              <td>${s.max_attempts}</td>
+              <td>${statusBadge}</td>
+              <td><div style="display:flex;gap:6px">
+                <button class="btn btn-secondary btn-sm" onclick="editSchedule('${s.id}')">Edit</button>
+                <button class="btn btn-primary btn-sm" onclick="manageEnrollments('${s.id}','${esc(s.batch_name)}')">👥 Enroll</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteSchedule('${s.id}')">Delete</button>
+              </div></td>
+            </tr>`;
+      }).join('')}
+        </tbody>
+      </table></div>`;
+    }
+
+    function openCreateModal() {
+      document.getElementById('sch-id').value = '';
+      document.getElementById('schedule-form').reset();
+      document.getElementById('sch-attempts').value = 1;
+      document.getElementById('modal-sch-title').textContent = 'Schedule Exam';
+      openModal('modal-schedule');
+    }
+
+    function editSchedule(id) {
+      const s = schedules.find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('sch-id').value = s.id;
+      document.getElementById('sch-exam').value = s.exam_id;
+      document.getElementById('sch-batch').value = s.batch_name;
+      document.getElementById('sch-start').value = s.start_time?.slice(0, 16);
+      document.getElementById('sch-end').value = s.end_time?.slice(0, 16);
+      document.getElementById('sch-attempts').value = s.max_attempts;
+      document.getElementById('sch-active').value = String(s.is_active);
+      document.getElementById('modal-sch-title').textContent = 'Edit Schedule';
+      openModal('modal-schedule');
+    }
+
+    document.getElementById('schedule-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const id = document.getElementById('sch-id').value;
+      const btn = document.getElementById('btn-save-sch');
+      const payload = {
+        exam_id: document.getElementById('sch-exam').value,
+        batch_name: document.getElementById('sch-batch').value.trim(),
+        start_time: new Date(document.getElementById('sch-start').value).toISOString(),
+        end_time: new Date(document.getElementById('sch-end').value).toISOString(),
+        max_attempts: parseInt(document.getElementById('sch-attempts').value),
+        is_active: document.getElementById('sch-active').value === 'true'
+      };
+      btn.disabled = true; btn.textContent = 'Saving...';
+      try {
+        if (id) await apiFetch(`/schedules/${id}`, { method: 'PUT', body: payload });
+        else await apiFetch('/schedules', { method: 'POST', body: payload });
+        showToast('Schedule saved!', 'success');
+        closeModal('modal-schedule');
+        schedules = await apiFetch('/schedules');
+        renderSchedules();
+      } catch (err) { showToast('Error: ' + err.message, 'error'); }
+      btn.disabled = false; btn.textContent = 'Save Schedule';
+    });
+
+    async function deleteSchedule(id) {
+      const ok = await confirmDialog('Delete this schedule?', 'Delete', true);
+      if (!ok) return;
+      try { await apiFetch(`/schedules/${id}`, { method: 'DELETE' }); showToast('Deleted', 'success'); schedules = schedules.filter(s => s.id !== id); renderSchedules(); }
+      catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function manageEnrollments(scheduleId, batchName) {
+      currentScheduleId = scheduleId;
+      document.getElementById('enroll-batch-name').textContent = batchName;
+      document.getElementById('student-search').value = '';
+
+      try {
+        const enrolled = await apiFetch(`/schedules/${scheduleId}/enrollments`);
+        enrolledIds = new Set(enrolled.map(e => e.student_id));
+      } catch { enrolledIds = new Set(); }
+
+      renderStudentsList(students);
+      openModal('modal-enroll');
+    }
+
+    function filterStudents() {
+      const q = document.getElementById('student-search').value.toLowerCase();
+      const filtered = students.filter(s => (s.name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q) || (s.roll_number || '').toLowerCase().includes(q));
+      renderStudentsList(filtered);
+    }
+
+    function renderStudentsList(list) {
+      const el = document.getElementById('students-list');
+      if (!list.length) { el.innerHTML = `<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:.85rem">No students found</div>`; return; }
+      el.innerHTML = list.map(s => `
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid var(--border)">
+          <input type="checkbox" id="enr_${s.id}" ${enrolledIds.has(s.id) ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer;accent-color:var(--navy-600)" onchange="toggleEnroll('${s.id}')">
+          <label for="enr_${s.id}" style="flex:1;cursor:pointer">
+            <div style="font-weight:600;font-size:.85rem">${esc(s.name)}</div>
+            <div style="font-size:.76rem;color:var(--text-muted)">${esc(s.email)} ${s.roll_number ? '· ' + esc(s.roll_number) : ''}</div>
+          </label>
+          ${enrolledIds.has(s.id) ? '<span class="badge badge-success" style="font-size:.68rem">Enrolled</span>' : ''}
+        </div>`).join('');
+    }
+
+    function toggleEnroll(id) {
+      if (enrolledIds.has(id)) enrolledIds.delete(id);
+      else enrolledIds.add(id);
+    }
+
+    async function saveEnrollments() {
+      try {
+        await apiFetch(`/schedules/${currentScheduleId}/enroll`, { method: 'POST', body: { student_ids: [...enrolledIds] } });
+        showToast(`${enrolledIds.size} students enrolled!`, 'success');
+        closeModal('modal-enroll');
+      } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    loadData();
+  </script>
+</body>
+
+</html>

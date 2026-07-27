@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Page Not Found | ExamHub</title>
+  <meta name="description" content="The page you're looking for doesn't exist." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --indigo-900: #1e1b4b;
+      --indigo-700: #3730a3;
+      --indigo-600: #4f46e5;
+      --indigo-500: #6366f1;
+      --indigo-100: #e0e7ff;
+      --slate-800: #1e293b;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --white: #ffffff;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 50%, #f5f3ff 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--slate-800);
+    }
+    .container {
+      text-align: center;
+      max-width: 560px;
+    }
+    .error-graphic {
+      font-size: 6rem;
+      line-height: 1;
+      margin-bottom: 24px;
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-16px); }
+    }
+    .error-code {
+      font-family: 'Outfit', sans-serif;
+      font-size: 7rem;
+      font-weight: 900;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--indigo-700), var(--indigo-500), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+    .error-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--slate-800);
+      margin-bottom: 12px;
+    }
+    .error-message {
+      font-size: 1rem;
+      color: var(--slate-500);
+      line-height: 1.7;
+      margin-bottom: 36px;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--indigo-700), var(--indigo-500));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(79, 70, 229, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45);
+    }
+    .btn-secondary {
+      background: var(--white);
+      color: var(--slate-800);
+      border: 1.5px solid var(--slate-200);
+    }
+    .btn-secondary:hover {
+      background: var(--indigo-100);
+      border-color: var(--indigo-500);
+      color: var(--indigo-700);
+      transform: translateY(-2px);
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 32px;
+      text-decoration: none;
+      color: var(--indigo-700);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--indigo-700), var(--indigo-500));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="brand">
+      <div class="brand-icon">🎓</div>
+      ExamHub
+    </a>
+
+    <div class="error-graphic">🗺️</div>
+    <div class="error-code">404</div>
+    <h1 class="error-title">Page Not Found</h1>
+    <p class="error-message">
+      The page you're looking for has moved, been removed, or never existed.<br>
+      Let's get you back on track.
+    </p>
+
+    <div class="actions">
+      <a href="/" class="btn btn-primary">🏠 Back to Home</a>
+      <a href="javascript:history.back()" class="btn btn-secondary">← Go Back</a>
+    </div>
+  </div>
+</body>
+</html>

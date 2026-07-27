@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>My Exams — ExamHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <!-- Top bar -->
+    <div class="top-bar">
+      <div class="top-bar-brand"><div class="top-bar-logo">🎓</div> ExamHub</div>
+      <div class="top-bar-right">
+        <div class="top-bar-user">
+          <div class="top-bar-avatar" id="hdr-avatar">?</div>
+          <span id="hdr-name"></span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="logout()" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)">Sign Out</button>
+      </div>
+    </div>
+    <nav class="navbar" id="navbar"></nav>
+
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div>
+          <div class="breadcrumb"><span>Home</span></div>
+          <h1 id="welcome-heading">My Exams</h1>
+          <p id="welcome-sub">View and start your assigned assessments</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="container">
+        <!-- Stats -->
+        <div class="grid grid-4" style="margin-bottom:24px">
+          <div class="stat-card blue animate-in">
+            <div class="stat-icon blue">📋</div>
+            <div><div class="stat-value" id="stat-available">—</div><div class="stat-label">Available</div></div>
+          </div>
+          <div class="stat-card green animate-in" style="animation-delay:.06s">
+            <div class="stat-icon green">✅</div>
+            <div><div class="stat-value" id="stat-completed">—</div><div class="stat-label">Completed</div></div>
+          </div>
+          <div class="stat-card orange animate-in" style="animation-delay:.12s">
+            <div class="stat-icon orange">🏆</div>
+            <div><div class="stat-value" id="stat-passed">—</div><div class="stat-label">Passed</div></div>
+          </div>
+          <div class="stat-card blue animate-in" style="animation-delay:.18s">
+            <div class="stat-icon blue">📈</div>
+            <div><div class="stat-value" id="stat-avg">—</div><div class="stat-label">Avg Score</div></div>
+          </div>
+        </div>
+
+        <!-- Exams List -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <h2 style="font-size:1.05rem;font-weight:700">Available Assessments</h2>
+          <span class="badge badge-blue" id="exam-badge"></span>
+        </div>
+        <div id="exams-container"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth('student');
+    const user = getUser();
+
+    // Header
+    const initials = (user.name || 'U').split(' ').map(n => n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('hdr-avatar').textContent = initials;
+    document.getElementById('hdr-name').textContent = user.name;
+    document.getElementById('welcome-heading').textContent = `Welcome, ${user.name?.split(' ')[0] || 'Candidate'}!`;
+    buildNavbar('My Exams');
+
+    async function loadDashboard() {
+      try {
+        const [exams, results] = await Promise.all([apiFetch('/exams'), apiFetch('/results/mine')]);
+
+        const completedIds = new Set(results.filter(r => r.status !== 'in_progress').map(r => r.exam_id));
+        const passedCount = results.filter(r => r.passed).length;
+        const avgScore = results.filter(r => r.percentage).reduce((s, r, _, a) => s + r.percentage / a.length, 0);
+
+        document.getElementById('stat-available').textContent = exams.length;
+        document.getElementById('stat-completed').textContent = completedIds.size;
+        document.getElementById('stat-passed').textContent = passedCount;
+        document.getElementById('stat-avg').textContent = results.length ? avgScore.toFixed(0) + '%' : '—';
+        document.getElementById('exam-badge').textContent = `${exams.length} exam${exams.length !== 1 ? 's' : ''}`;
+
+        const container = document.getElementById('exams-container');
+        if (!exams.length) {
+          container.innerHTML = `<div class="card"><div class="empty-state"><div class="empty-icon">📭</div><h3>No exams available yet</h3><p>Check back later or contact your administrator.</p></div></div>`;
+          return;
+        }
+
+        container.innerHTML = exams.map((exam, i) => {
+          const myResult = results.find(r => r.exam_id === exam.id && r.status !== 'in_progress');
+          const inProgress = results.find(r => r.exam_id === exam.id && r.status === 'in_progress');
+          const done = !!myResult;
+          const totalSections = exam.exam_sections?.length || 0;
+
+          return `<div class="card animate-in" style="margin-bottom:14px;animation-delay:${i*.06}s">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+                  <h3 style="font-size:1rem;font-weight:700;margin:0">${esc(exam.title)}</h3>
+                  ${exam.exam_code ? `<span class="badge badge-grey">${esc(exam.exam_code)}</span>` : ''}
+                  ${done ? (myResult.passed ? '<span class="badge badge-success">✓ Passed</span>' : '<span class="badge badge-danger">✕ Failed</span>') : (inProgress ? '<span class="badge badge-warning">⏸ In Progress</span>' : '<span class="badge badge-blue">Available</span>')}
+                </div>
+                <p style="color:var(--text-muted);font-size:.83rem;margin-bottom:10px">${esc(exam.description || 'No description')}</p>
+                <div style="display:flex;gap:16px;font-size:.8rem;color:var(--text-muted);flex-wrap:wrap">
+                  <span>⏱ ${exam.total_duration} min</span>
+                  <span>🎯 Pass: ${exam.pass_percentage}%</span>
+                  <span>📊 ${exam.total_marks} marks</span>
+                  ${totalSections > 0 ? `<span>📂 ${totalSections} sections</span>` : ''}
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0">
+                ${done
+                  ? `<div style="text-align:right">
+                      <div style="font-size:1.5rem;font-weight:800;color:${myResult.passed ? 'var(--success)' : 'var(--danger)'}">${(myResult.percentage||0).toFixed(1)}%</div>
+                      <div style="font-size:.75rem;color:var(--text-muted)">${myResult.total_score}/${myResult.total_marks} marks</div>
+                    </div>
+                    <a href="/student/results.html?id=${myResult.id}" class="btn btn-secondary btn-sm">View Result →</a>`
+                  : inProgress
+                    ? `<a href="/student/exam.html?id=${exam.id}" class="btn btn-warning btn-sm">▶ Resume Exam</a>`
+                    : `<a href="/student/exam.html?id=${exam.id}" class="btn btn-primary">Start Exam →</a>`
+                }
+              </div>
+            </div>
+            ${done ? `<div class="divider" style="margin:14px 0"></div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="progress" style="flex:1"><div class="progress-fill${myResult.passed ? ' success' : ' danger'}" style="width:${myResult.percentage||0}%"></div></div>
+                <span style="font-size:.78rem;color:var(--text-muted);white-space:nowrap">${(myResult.percentage||0).toFixed(1)}% · ${formatDate(myResult.submitted_at)}</span>
+              </div>` : ''}
+          </div>`;
+        }).join('');
+      } catch (err) {
+        showToast('Failed to load: ' + err.message, 'error');
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

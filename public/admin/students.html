@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Manage Students — ExamHub Admin</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="top-bar">
+      <div class="top-bar-brand"><div class="top-bar-logo">🎓</div> ExamHub Admin</div>
+      <div class="top-bar-right"><button class="btn btn-secondary btn-sm" onclick="logout()" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)">Sign Out</button></div>
+    </div>
+    <nav class="navbar" id="navbar"></nav>
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div><h1>Student Management</h1><p>Manage batches, branches, and enrollments</p></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-secondary" onclick="openImportModal()">📥 Bulk Import (CSV)</button>
+        </div>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="container">
+        
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Registered Students</h3>
+            <div style="display:flex;gap:12px">
+              <input type="text" id="search-inp" class="form-control form-control-sm" placeholder="Search by name, roll no, or email..." onkeyup="filterTable()" style="width:250px">
+              <select id="filter-branch" class="form-control form-control-sm" onchange="filterTable()" style="width:150px">
+                <option value="">All Branches</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table class="table" id="students-table">
+              <thead>
+                <tr>
+                  <th>Roll No</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Branch & Semester</th>
+                  <th>Batch / Section</th>
+                  <th>Status</th>
+                  <th style="width:120px">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody">
+                <tr><td colspan="7" style="text-align:center;padding:24px">Loading students...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Student Modal -->
+  <div class="modal-overlay" id="modal-student">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Student Details</h3>
+        <button class="modal-close" onclick="closeModal('modal-student')">✕</button>
+      </div>
+      <form id="student-form">
+        <input type="hidden" id="sf-id">
+        <div class="grid grid-2">
+          <div class="form-group col-span-2">
+            <label class="form-label required">Full Name</label>
+            <input class="form-control" id="sf-name" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Roll / Hall Ticket No</label>
+            <input class="form-control" id="sf-roll">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Branch / Course</label>
+            <input class="form-control" id="sf-branch" placeholder="e.g. B.Tech CSE">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Semester / Year</label>
+            <input class="form-control" id="sf-semester" placeholder="e.g. Semester 6">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Batch</label>
+            <input class="form-control" id="sf-batch" placeholder="e.g. 2024">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Section</label>
+            <input class="form-control" id="sf-section" placeholder="e.g. A">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-student')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-student">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Bulk Import Modal -->
+  <div class="modal-overlay" id="modal-import">
+    <div class="modal" style="max-width:700px">
+      <div class="modal-header">
+        <h3 class="modal-title">📥 Bulk Import Students (CSV)</h3>
+        <button class="modal-close" onclick="closeModal('modal-import')">✕</button>
+      </div>
+      <div style="padding:16px;background:var(--bg-section-bar);border-radius:var(--radius-sm);margin-bottom:16px;font-size:.85rem">
+        <p>Your CSV file must have a header row with exact column names.</p>
+        <p><strong>Required columns:</strong> <code>name</code>, <code>email</code></p>
+        <p><strong>Optional columns:</strong> <code>roll_number</code>, <code>branch</code>, <code>semester</code>, <code>batch</code>, <code>section</code>, <code>password</code></p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Select CSV File</label>
+        <input type="file" id="csv-upload" accept=".csv" class="form-control">
+      </div>
+      <div id="import-preview" style="display:none;margin-top:16px">
+        <div style="font-weight:600;margin-bottom:8px" id="import-stats">Found 0 valid records.</div>
+        <div class="table-wrapper" style="max-height:300px;overflow-y:auto">
+          <table class="table" style="font-size:0.8rem">
+            <thead>
+              <tr><th>Name</th><th>Email</th><th>Roll No</th><th>Branch</th></tr>
+            </thead>
+            <tbody id="import-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-import')">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-confirm-import" style="display:none" onclick="confirmImport()">Confirm Import</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth('admin');
+    let allStudents = [];
+    let parsedCsvData = [];
+
+    async function loadStudents() {
+      try {
+        const res = await fetch(API_BASE + '/admin/students', { headers: { 'Authorization': 'Bearer ' + getToken() }});
+        if (!res.ok) throw new Error('Failed to load students');
+        allStudents = await res.json();
+        
+        // Populate branch filter
+        const branches = [...new Set(allStudents.map(s => s.branch).filter(Boolean))].sort();
+        const branchSelect = document.getElementById('filter-branch');
+        branchSelect.innerHTML = '<option value="">All Branches</option>' + branches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+
+        renderStudents(allStudents);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function filterTable() {
+      const q = document.getElementById('search-inp').value.toLowerCase();
+      const b = document.getElementById('filter-branch').value;
+      const filtered = allStudents.filter(s => {
+        const matchQ = (s.name||'').toLowerCase().includes(q) || (s.email||'').toLowerCase().includes(q) || (s.roll_number||'').toLowerCase().includes(q);
+        const matchB = b ? s.branch === b : true;
+        return matchQ && matchB;
+      });
+      renderStudents(filtered);
+    }
+
+    function renderStudents(list) {
+      const tbody = document.getElementById('students-tbody');
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:24px">No students found.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = list.map(s => `
+        <tr>
+          <td><span class="badge" style="font-family:monospace">${esc(s.roll_number || 'N/A')}</span></td>
+          <td style="font-weight:600">${esc(s.name)}</td>
+          <td style="color:var(--text-muted)">${esc(s.email)}</td>
+          <td>
+            <div style="font-size:0.9rem">${esc(s.branch || '-')}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${esc(s.semester || '')}</div>
+          </td>
+          <td>
+            <div style="font-size:0.9rem">${esc(s.batch || '-')}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${s.section ? 'Sec ' + esc(s.section) : ''}</div>
+          </td>
+          <td>
+            ${s.is_active 
+              ? `<span class="badge" style="background:var(--success-bg);color:var(--success);border-color:var(--success-border)">Active</span>`
+              : `<span class="badge" style="background:var(--danger-bg);color:var(--danger);border-color:var(--danger-border)">Blocked</span>`
+            }
+          </td>
+          <td>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-secondary btn-sm" onclick="editStudent('${s.id}')" title="Edit Details">✏️</button>
+              ${s.is_active
+                ? `<button class="btn btn-secondary btn-sm" onclick="toggleStatus('${s.id}', false)" style="color:var(--danger)" title="Block Student">🚫</button>`
+                : `<button class="btn btn-secondary btn-sm" onclick="toggleStatus('${s.id}', true)" style="color:var(--success)" title="Unblock Student">✅</button>`
+              }
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Toggle Active Status
+    async function toggleStatus(id, isActive) {
+      if(!confirm(`Are you sure you want to ${isActive ? 'unblock' : 'block'} this student?`)) return;
+      try {
+        const res = await fetch(API_BASE + `/admin/students/${id}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ is_active: isActive })
+        });
+        if (!res.ok) throw new Error('Failed to update status');
+        showToast('Student status updated', 'success');
+        loadStudents();
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Edit Modal
+    function editStudent(id) {
+      const student = allStudents.find(s => s.id === id);
+      if(!student) return;
+      document.getElementById('sf-id').value = student.id;
+      document.getElementById('sf-name').value = student.name || '';
+      document.getElementById('sf-roll').value = student.roll_number || '';
+      document.getElementById('sf-branch').value = student.branch || '';
+      document.getElementById('sf-semester').value = student.semester || '';
+      document.getElementById('sf-batch').value = student.batch || '';
+      document.getElementById('sf-section').value = student.section || '';
+      openModal('modal-student');
+    }
+
+    document.getElementById('student-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('sf-id').value;
+      const payload = {
+        name: document.getElementById('sf-name').value,
+        roll_number: document.getElementById('sf-roll').value,
+        branch: document.getElementById('sf-branch').value,
+        semester: document.getElementById('sf-semester').value,
+        batch: document.getElementById('sf-batch').value,
+        section: document.getElementById('sf-section').value,
+      };
+      
+      const btn = document.getElementById('btn-save-student');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      try {
+        const res = await fetch(API_BASE + `/admin/students/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Failed to update student');
+        showToast('Student updated', 'success');
+        closeModal('modal-student');
+        loadStudents();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
+    });
+
+    // ── Bulk Import CSV ──────────────────────────────────────────────────────────
+    function openImportModal() {
+      document.getElementById('csv-upload').value = '';
+      document.getElementById('import-preview').style.display = 'none';
+      document.getElementById('btn-confirm-import').style.display = 'none';
+      parsedCsvData = [];
+      openModal('modal-import');
+    }
+
+    document.getElementById('csv-upload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          const valid = results.data.filter(row => row.email && row.name);
+          parsedCsvData = valid;
+          
+          document.getElementById('import-preview').style.display = 'block';
+          document.getElementById('import-stats').textContent = `Found ${valid.length} valid records (out of ${results.data.length} total rows).`;
+          
+          if (valid.length > 0) {
+            document.getElementById('btn-confirm-import').style.display = 'block';
+            document.getElementById('import-tbody').innerHTML = valid.slice(0, 100).map(r => `
+              <tr>
+                <td>${esc(r.name)}</td>
+                <td>${esc(r.email)}</td>
+                <td>${esc(r.roll_number || '-')}</td>
+                <td>${esc(r.branch || '-')}</td>
+              </tr>
+            `).join('') + (valid.length > 100 ? `<tr><td colspan="4" style="text-align:center;color:var(--text-muted)">...and ${valid.length - 100} more rows</td></tr>` : '');
+          } else {
+            document.getElementById('btn-confirm-import').style.display = 'none';
+            document.getElementById('import-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--danger)">No valid records with name & email found.</td></tr>';
+          }
+        }
+      });
+    });
+
+    async function confirmImport() {
+      if (parsedCsvData.length === 0) return;
+      
+      const btn = document.getElementById('btn-confirm-import');
+      btn.disabled = true;
+      btn.textContent = 'Importing... Please wait...';
+      
+      try {
+        const res = await fetch(API_BASE + '/admin/students/bulk-import', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+          body: JSON.stringify({ students: parsedCsvData })
+        });
+        const result = await res.json();
+        
+        if (!res.ok) throw new Error(result.error || 'Import failed');
+        
+        if (result.errors && result.errors.length > 0) {
+          console.error("Import Errors:", result.errors);
+          showToast(`Imported ${result.imported}. Errors on ${result.errors.length} rows (check console).`, 'warning', 5000);
+        } else {
+          showToast(`Successfully imported ${result.imported} students!`, 'success');
+        }
+        
+        closeModal('modal-import');
+        loadStudents();
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirm Import';
+      }
+    }
+
+    // Init
+    loadStudents();
+  </script>
+</body>
+</html>

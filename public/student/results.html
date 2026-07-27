@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Exam Result — ExamHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="top-bar"><div class="top-bar-brand"><div class="top-bar-logo">🎓</div> ExamHub</div><div class="top-bar-right"><button class="btn btn-secondary btn-sm" onclick="logout()" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)">Sign Out</button></div></div>
+    <nav class="navbar" id="navbar"></nav>
+
+    <div id="result-body" style="padding:28px 0 60px">
+      <div class="container" style="max-width:860px">
+        <div id="loading-state" style="text-align:center;padding:60px"><div class="spinner" style="margin:0 auto 12px"></div><span style="color:var(--text-muted)">Loading your result...</span></div>
+        <div id="result-content" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    requireAuth('student');
+    buildNavbar('My Results');
+    const params = new URLSearchParams(location.search);
+    const resultId = params.get('id');
+    if (!resultId) window.location.href = '/student/dashboard.html';
+
+    let resultData;
+
+    async function load() {
+      try {
+        resultData = await apiFetch(`/results/${resultId}`);
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('result-content').style.display = 'block';
+        render();
+      } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    function render() {
+      const r = resultData;
+      const pct = (r.percentage || 0).toFixed(1);
+      const passColor = r.passed ? '#4ade80' : '#f87171';
+
+      // Section score cards
+      const sectionCards = (r.result_sections || []).map(s => {
+        const sp = s.max_score > 0 ? ((s.score / s.max_score) * 100).toFixed(0) : 0;
+        return `<div class="section-score-card">
+          <div class="section-score-ring" style="border-color:${sp >= 40 ? 'var(--success)' : 'var(--danger)'}">${sp}%</div>
+          <div>
+            <div style="font-weight:700;font-size:.88rem">${esc(s.section_name||'Section')}</div>
+            <div style="font-size:.78rem;color:var(--text-muted)">${s.score}/${s.max_score} marks · ${s.correct} correct · ${s.wrong} wrong · ${s.skipped} skipped</div>
+            <div class="progress" style="margin-top:6px"><div class="progress-fill${sp >= 40 ? '' : ' danger'}" style="width:${sp}%"></div></div>
+          </div>
+        </div>`;
+      }).join('');
+
+      // Answer review
+      const answeredQs = (r.result_answers || []).filter(a => a.status !== 'not_visited');
+      const answerReview = answeredQs.slice(0, 20).map((a, i) => {
+        const q = a.questions;
+        if (!q) return '';
+        let answerDisplay = a.answer_text || '(Not answered)';
+        if (q.options?.length && a.selected_options?.length) {
+          const selOpts = (q.options || []).filter(o => a.selected_options.includes(o.id));
+          answerDisplay = selOpts.map(o => o.content).join(', ') || '(Not answered)';
+        }
+        const correctOpts = (q.options || []).filter(o => o.is_correct).map(o => o.content).join(', ');
+        const icon = a.is_correct === null ? '⬜' : (a.is_correct ? '✅' : '❌');
+        return `<div style="padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-size:.72rem;font-weight:700;text-transform:uppercase;color:var(--text-muted)">Q${i+1} · ${q.type?.toUpperCase()}</span>
+            <span>${icon} ${a.marks_awarded > 0 ? `+${a.marks_awarded}` : (a.marks_awarded < 0 ? a.marks_awarded : '0')} marks</span>
+          </div>
+          <div style="font-size:.85rem;font-weight:600;margin-bottom:6px">${esc(q.content)}</div>
+          <div style="font-size:.8rem;display:flex;gap:16px;flex-wrap:wrap">
+            <span style="color:${a.is_correct ? 'var(--success)' : 'var(--danger)'}">Your answer: ${esc(answerDisplay)}</span>
+            ${correctOpts ? `<span style="color:var(--success)">Correct: ${esc(correctOpts)}</span>` : ''}
+          </div>
+          ${a.admin_feedback ? `<div style="margin-top:6px;font-size:.78rem;color:var(--navy-600);background:var(--navy-50);padding:6px 8px;border-radius:4px">💬 ${esc(a.admin_feedback)}</div>` : ''}
+        </div>`;
+      }).join('');
+
+      document.getElementById('result-content').innerHTML = `
+        <!-- Hero -->
+        <div class="result-hero animate-in" id="cert-hero">
+          <div style="font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:16px">Examination Result</div>
+          <h1 style="font-size:1.4rem;font-weight:800;margin-bottom:4px">${esc(r.exams?.title||'')}</h1>
+          ${r.exams?.exam_code ? `<div style="opacity:.5;font-size:.8rem;margin-bottom:20px">${esc(r.exams.exam_code)}</div>` : '<div style="margin-bottom:20px"></div>'}
+
+          <div class="result-score-big" style="color:${passColor}">${pct}%</div>
+          <div class="result-status ${r.passed ? 'result-pass' : 'result-fail'}" style="margin-top:8px">
+            ${r.passed ? '🏆 PASSED' : '❌ NOT CLEARED'}
+          </div>
+          <div style="opacity:.6;font-size:.85rem;margin-top:4px">${r.total_score} out of ${r.total_marks} marks</div>
+
+          <div style="display:flex;justify-content:center;gap:32px;margin-top:28px;flex-wrap:wrap">
+            <div style="text-align:center"><div style="font-size:1.2rem;font-weight:800">${esc(r.student_name||'')}</div><div style="opacity:.5;font-size:.75rem">Candidate</div></div>
+            ${r.roll_number ? `<div style="text-align:center"><div style="font-size:1.2rem;font-weight:800">${esc(r.roll_number)}</div><div style="opacity:.5;font-size:.75rem">Roll Number</div></div>` : ''}
+            <div style="text-align:center"><div style="font-size:1.2rem;font-weight:800">${formatTime(r.time_taken)}</div><div style="opacity:.5;font-size:.75rem">Time Taken</div></div>
+            <div style="text-align:center"><div style="font-size:1.2rem;font-weight:800">${formatDate(r.submitted_at)}</div><div style="opacity:.5;font-size:.75rem">Submitted On</div></div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px;flex-wrap:wrap">
+          <a href="/student/dashboard.html" class="btn btn-secondary">← Back to Dashboard</a>
+          <button class="btn btn-primary" onclick="downloadPDF()">📄 Download PDF Report</button>
+          ${r.passed && r.exams?.enable_certificate !== false ? `<a href="/student/certificate.html?name=${encodeURIComponent(r.student_name)}&exam=${encodeURIComponent(r.exams?.title)}&score=${pct}&date=${r.submitted_at}" target="_blank" class="btn btn-success">🎓 View Certificate</a>` : ''}
+        </div>
+
+        <!-- Section Scores -->
+        ${r.result_sections?.length ? `
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-header"><div class="card-title">📊 Section-wise Score Breakdown</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px">${sectionCards}</div>
+          </div>` : ''}
+
+        <!-- Overall Stats -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><div class="card-title">📈 Performance Summary</div></div>
+          <div class="grid grid-4" style="margin-bottom:0">
+            ${[
+              { label: 'Total Questions', val: r.result_answers?.length || 0 },
+              { label: 'Attempted', val: r.result_answers?.filter(a => a.status !== 'not_visited').length || 0 },
+              { label: 'Correct', val: r.result_answers?.filter(a => a.is_correct === true).length || 0 },
+              { label: 'Wrong', val: r.result_answers?.filter(a => a.is_correct === false).length || 0 }
+            ].map(s => `<div style="text-align:center;padding:12px;background:var(--bg-page);border-radius:var(--radius-sm)">
+              <div style="font-size:1.5rem;font-weight:800">${s.val}</div>
+              <div style="font-size:.75rem;color:var(--text-muted)">${s.label}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- Answer Review -->
+        ${answeredQs.length ? `
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">📝 Answer Review</div>
+              <span class="badge badge-grey">Top ${Math.min(20, answeredQs.length)} shown</span>
+            </div>
+            ${answerReview}
+          </div>` : ''}`;
+    }
+
+    async function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const r = resultData;
+      const pct = (r.percentage || 0).toFixed(1);
+      const W = 210, H = 297;
+
+      // Background
+      doc.setFillColor(10, 22, 40);
+      doc.rect(0, 0, W, H, 'F');
+
+      // Decorative top strip
+      doc.setFillColor(30, 77, 154);
+      doc.rect(0, 0, W, 12, 'F');
+
+      // Title area
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont('helvetica', 'bold');
+      doc.text('EXAMHUB', W/2, 36, { align: 'center' });
+
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(150, 170, 210);
+      doc.text('OFFICIAL EXAMINATION RESULT CERTIFICATE', W/2, 46, { align: 'center' });
+
+      // Divider line
+      doc.setDrawColor(30, 77, 154);
+      doc.setLineWidth(0.5);
+      doc.line(20, 52, W-20, 52);
+
+      // Score ring
+      doc.setFillColor(r.passed ? 22 : 220, r.passed ? 163 : 38, r.passed ? 74 : 38);
+      doc.circle(W/2, 85, 22, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text(pct + '%', W/2, 91, { align: 'center' });
+
+      doc.setFontSize(14);
+      doc.text(r.passed ? 'PASSED' : 'NOT CLEARED', W/2, 117, { align: 'center' });
+
+      // Exam title
+      doc.setFontSize(13);
+      doc.setTextColor(200, 220, 255);
+      doc.text(r.exams?.title || '', W/2, 128, { align: 'center' });
+
+      // Candidate info box
+      doc.setFillColor(15, 32, 68);
+      doc.roundedRect(20, 138, W-40, 55, 4, 4, 'F');
+
+      const infoItems = [
+        ['Candidate Name', r.student_name || '—'],
+        ['Roll Number', r.roll_number || '—'],
+        ['Score', `${r.total_score} / ${r.total_marks} marks`],
+        ['Percentage', `${pct}%`],
+        ['Time Taken', formatTime(r.time_taken)],
+        ['Submitted On', formatDateTime(r.submitted_at)]
+      ];
+
+      doc.setFontSize(9);
+      infoItems.forEach((item, i) => {
+        const x = i % 2 === 0 ? 30 : W/2 + 5;
+        const y = 150 + Math.floor(i / 2) * 15;
+        doc.setTextColor(100, 140, 200);
+        doc.setFont('helvetica', 'normal');
+        doc.text(item[0].toUpperCase(), x, y);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.text(item[1], x, y + 7);
+      });
+
+      // Section scores
+      if (r.result_sections?.length) {
+        let y = 205;
+        doc.setTextColor(100, 140, 200);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.text('SECTION-WISE PERFORMANCE', W/2, y, { align: 'center' });
+        y += 8;
+
+        r.result_sections.forEach(s => {
+          const sp = s.max_score > 0 ? ((s.score / s.max_score) * 100).toFixed(0) : 0;
+          doc.setFillColor(20, 40, 80);
+          doc.roundedRect(20, y, W-40, 10, 2, 2, 'F');
+          doc.setTextColor(200, 220, 255);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.text(s.section_name || '', 25, y + 7);
+          doc.setTextColor(s.passed || sp >= 40 ? 74 : 220, s.passed || sp >= 40 ? 222 : 38, s.passed || sp >= 40 ? 128 : 38);
+          doc.text(`${s.score}/${s.max_score} (${sp}%)`, W - 25, y + 7, { align: 'right' });
+          y += 13;
+        });
+      }
+
+      // Footer
+      doc.setFillColor(30, 77, 154);
+      doc.rect(0, H - 16, W, 16, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(7.5);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`ExamHub · Verified Certificate · Generated: ${new Date().toLocaleString('en-IN')}`, W/2, H - 6, { align: 'center' });
+
+      doc.save(`Result_${r.student_name}_${r.exams?.exam_code || r.exam_id}.pdf`);
+    }
+
+    load();
+  </script>
+</body>
+</html>

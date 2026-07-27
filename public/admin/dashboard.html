@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">`n  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <title>Admin Dashboard — ExamHub</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="top-bar">
+      <div class="top-bar-brand"><div class="top-bar-logo">🎓</div> ExamHub Admin</div>
+      <div class="top-bar-right">
+        <span style="font-size:.78rem;color:rgba(255,255,255,.5)">Administration Panel</span>
+        <button class="btn btn-secondary btn-sm" onclick="logout()" style="color:rgba(255,255,255,.7);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15)">Sign Out</button>
+      </div>
+    </div>
+    <nav class="navbar" id="navbar"></nav>
+
+    <div class="page-header">
+      <div class="page-header-inner">
+        <div>
+          <div class="breadcrumb"><span>Admin</span></div>
+          <h1>Dashboard Overview</h1>
+          <p>Platform statistics and recent activity</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a href="/admin/exams.html" class="btn btn-primary">+ New Exam</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-body">
+      <div class="container">
+        <!-- Stats -->
+        <div class="grid grid-4" style="margin-bottom:24px">
+          <div class="stat-card blue animate-in">
+            <div class="stat-icon blue">🎓</div>
+            <div><div class="stat-value" id="s-students">—</div><div class="stat-label">Registered Students</div></div>
+          </div>
+          <div class="stat-card blue animate-in" style="animation-delay:.06s">
+            <div class="stat-icon blue">📋</div>
+            <div><div class="stat-value" id="s-exams">—</div><div class="stat-label">Total Exams</div></div>
+          </div>
+          <div class="stat-card green animate-in" style="animation-delay:.12s">
+            <div class="stat-icon green">✅</div>
+            <div><div class="stat-value" id="s-submissions">—</div><div class="stat-label">Submissions</div></div>
+          </div>
+          <div class="stat-card orange animate-in" style="animation-delay:.18s">
+            <div class="stat-icon orange">⏳</div>
+            <div><div class="stat-value" id="s-active">—</div><div class="stat-label">Active (In Progress)</div></div>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="align-items:start">
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card-header"><div class="card-title">Quick Actions</div></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <a href="/admin/exams.html" style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;color:inherit;transition:var(--transition)" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+                <span style="font-size:1.5rem">📝</span>
+                <div><div style="font-weight:700;font-size:.88rem">Manage Exams</div><div style="font-size:.78rem;color:var(--text-muted)">Create, edit, publish</div></div>
+                <span style="margin-left:auto;color:var(--text-muted)">→</span>
+              </a>
+              <a href="/admin/questions.html" style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;color:inherit;transition:var(--transition)" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+                <span style="font-size:1.5rem">❓</span>
+                <div><div style="font-weight:700;font-size:.88rem">Question Bank</div><div style="font-size:.78rem;color:var(--text-muted)">MCQ, Subjective, Numeric</div></div>
+                <span style="margin-left:auto;color:var(--text-muted)">→</span>
+              </a>
+              <a href="/admin/schedule.html" style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;color:inherit;transition:var(--transition)" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+                <span style="font-size:1.5rem">📅</span>
+                <div><div style="font-weight:700;font-size:.88rem">Schedule & Batches</div><div style="font-size:.78rem;color:var(--text-muted)">Assign exams to students</div></div>
+                <span style="margin-left:auto;color:var(--text-muted)">→</span>
+              </a>
+              <a href="/admin/results.html" style="display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--border);border-radius:var(--radius-sm);text-decoration:none;color:inherit;transition:var(--transition)" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background=''">
+                <span style="font-size:1.5rem">📊</span>
+                <div><div style="font-weight:700;font-size:.88rem">Results & Grading</div><div style="font-size:.78rem;color:var(--text-muted)">View scores, grade subjective</div></div>
+                <span style="margin-left:auto;color:var(--text-muted)">→</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Recent Submissions -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Submissions</div>
+              <a href="/admin/results.html" class="btn btn-secondary btn-sm">View All →</a>
+            </div>
+            <div id="recent-list" style="display:flex;flex-direction:column;gap:10px">
+              <div style="text-align:center;padding:20px;color:var(--text-muted)"><div class="spinner" style="margin:0 auto 8px"></div><span style="font-size:.82rem">Loading...</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Chart -->
+        <div class="card" style="margin-top:24px">
+          <div class="card-header"><div class="card-title">Performance Analytics</div></div>
+          <div style="height:300px;position:relative">
+            <canvas id="analyticsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    requireAuth('admin');
+    buildNavbar('Dashboard');
+
+    let analyticsChart = null;
+
+    function renderChart(results) {
+      const ctx = document.getElementById('analyticsChart').getContext('2d');
+      
+      // Group results by exam
+      const examStats = {};
+      results.forEach(r => {
+        const title = r.exams?.title || 'Unknown';
+        if (!examStats[title]) examStats[title] = { passes: 0, fails: 0 };
+        if (r.passed) examStats[title].passes++;
+        else if (r.status === 'submitted' || r.status === 'graded') examStats[title].fails++;
+      });
+
+      const labels = Object.keys(examStats);
+      const passes = labels.map(l => examStats[l].passes);
+      const fails = labels.map(l => examStats[l].fails);
+
+      if (analyticsChart) analyticsChart.destroy();
+
+      analyticsChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'Passed', data: passes, backgroundColor: '#16a34a', borderRadius: 4 },
+            { label: 'Failed', data: fails, backgroundColor: '#dc2626', borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, stacked: true },
+            x: { stacked: true }
+          },
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+
+    async function load() {
+      try {
+        const [stats, results] = await Promise.all([apiFetch('/stats'), apiFetch('/results')]);
+        document.getElementById('s-students').textContent = stats.totalStudents;
+        document.getElementById('s-exams').textContent = stats.totalExams;
+        document.getElementById('s-submissions').textContent = stats.totalSubmissions;
+        document.getElementById('s-active').textContent = stats.activeExams;
+
+        renderChart(results);
+
+        const recent = results.sort((a,b) => new Date(b.submitted_at||b.started_at) - new Date(a.submitted_at||a.started_at)).slice(0,8);
+        const el = document.getElementById('recent-list');
+        if (!recent.length) { el.innerHTML = `<div class="empty-state" style="padding:20px"><p>No submissions yet.</p></div>`; return; }
+        el.innerHTML = recent.map(r => `
+          <div style="display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--border);border-radius:var(--radius-sm)">
+            <div style="width:34px;height:34px;border-radius:50%;background:var(--navy-50);border:1px solid var(--navy-200);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;color:var(--navy-700);flex-shrink:0">
+              ${esc((r.student_name||'?').charAt(0).toUpperCase())}
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:600;font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.student_name||'Unknown')}</div>
+              <div style="font-size:.76rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(r.exams?.title||'')}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-weight:700;font-size:.88rem;color:${r.passed ? 'var(--success)' : 'var(--danger)'}">${(r.percentage||0).toFixed(0)}%</div>
+              <span class="badge ${r.status === 'in_progress' ? 'badge-warning' : (r.passed ? 'badge-success' : 'badge-danger')}" style="font-size:.68rem">${r.status === 'in_progress' ? 'In Progress' : (r.passed ? 'Pass' : 'Fail')}</span>
+            </div>
+            <a href="/admin/results.html?id=${r.id}" class="btn btn-secondary btn-sm">View</a>
+          </div>`).join('');
+      } catch (err) { showToast('Load error: ' + err.message, 'error'); }
+    }
+    load();
+  </script>
+</body>
+</html>
